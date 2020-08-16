@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         ../protocol/SerialThread.cpp \
         ../protocol/mainobj.cpp \
+        ../protocol/protocol.cpp \
         main.cpp
 
 # Default rules for deployment.

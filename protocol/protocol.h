@@ -3,9 +3,10 @@
 
 #include <stdint.h>
 
+#include <QByteArray>
 
 
-#define TX_REQUEST_16       0x1
+#define TX_REQUEST_16       0x01
 #define RX_RESPONSE_16      0x81
 #define TX_STATUS_RESPONSE  0x89
 #define NO_FRAME            0xFF
@@ -93,5 +94,8 @@ typedef struct __attribute__((packed)) Receive_Package_16{
     uint8_t data[MAX_LEN];
 }  Receive_Package_16;
 
+
+Transmit_Request_16 create_Transmit_Request_16(QByteArray &data, uint16_t receiver);
+QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat);
 
 #endif //_PROTOCOL_

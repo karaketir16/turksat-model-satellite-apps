@@ -95,9 +95,9 @@ int main(int argc, char *argv[])
     for(; i < DataFile.size(); i+=50)
     {
         auto sendThat = DataFile.mid(i, 50);
-        packageIT(sendThat);
-        Transmit_Request_16 tx;
-        memcpy(&tx, sendThat.data(), sendThat.size());
+//        packageIT(sendThat);
+        Transmit_Request_16 tx = create_Transmit_Request_16(sendThat, 0x003C);
+//        memcpy(&tx, sendThat.data(), sendThat.size());
 
         test->transmitQueuesMutex.lock();
         test->transmitQueues[1].enqueue(tx);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 //        if( ! (--xx)){
 //            break;
 //        }
-        qDebug() << i + 50 << " of " << DataFile.size();
+//        qDebug() << i + 50 << " of " << DataFile.size();
     }
     QByteArray dummy;
     dummy.fill(0, 77);
