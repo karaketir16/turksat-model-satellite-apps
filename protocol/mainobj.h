@@ -13,11 +13,11 @@ public:
     explicit mainObj(QObject *parent = nullptr);
 
 signals:
-    void receiveRX(Receive_Package_16 &);
-    void receiveTXStat(Transmit_Status &);
+    void receive(QByteArray);
+    void receiveTXStat(Transmit_Status);
 
 public slots:
-    void send(QByteArray &);
+    void send(QByteArray, uint16_t receiver);
     void receiveData();
 
 public:

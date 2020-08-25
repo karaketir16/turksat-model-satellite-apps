@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include <QByteArray>
-
+#include <QPair>
 
 #define TX_REQUEST_16       0x01
 #define RX_RESPONSE_16      0x81
@@ -13,7 +13,7 @@
 
 #define START_DELIMITER     0x7E
 
-#define MAX_LEN 85 // I select a sufficently large number as max, real max for xbee is different
+#define MAX_LEN 90 // I select a sufficently large number as max, real max for xbee is different
 
 
 typedef struct __attribute__((packed)) Header{
@@ -95,7 +95,7 @@ typedef struct __attribute__((packed)) Receive_Package_16{
 }  Receive_Package_16;
 
 
-Transmit_Request_16 create_Transmit_Request_16(QByteArray &data, uint16_t receiver);
-QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat);
-
+QPair<Transmit_Request_16, uint32_t> create_Transmit_Request_16(QByteArray &data, uint16_t receiver);
+QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat, uint8_t *RSSI);
+QByteArray to_byte_array(void* ptr, uint32_t size);
 #endif //_PROTOCOL_

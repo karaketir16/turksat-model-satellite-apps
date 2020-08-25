@@ -16,10 +16,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        ../protocol/SerialThread.cpp \
+        ../protocol/abstracttelemetryobject.cpp \
+        ../protocol/telemetry_protocol.cpp \
+        SerialThread.cpp \
         ../protocol/mainobj.cpp \
         ../protocol/protocol.cpp \
-        main.cpp
+        main.cpp \
+        stationtelemetryobject.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -27,7 +30,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ../protocol/SerialThread.h \
+    ../protocol/abstracttelemetryobject.h \
+    ../protocol/telemetry_protocol.h \
+    SerialThread.h \
     ../protocol/mainobj.h \
-    ../protocol/protocol.h
+    ../protocol/protocol.h \
+    stationtelemetryobject.h
 

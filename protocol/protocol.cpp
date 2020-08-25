@@ -2,35 +2,9 @@
 
 #include <QByteArray>
 
+#include <QPair>
 
-
-//void checkSum(QByteArray& arr){
-//    uint8_t res = 0;
-//    for(int i =3;i<arr.size(); i++)
-//    {
-//        res += arr.data()[i];
-//    }
-//    arr.push_back(0xFF - res);
-//}
-
-//void packageIT(QByteArray &arr)
-//{
-//    QByteArray it;
-//    it.resize(8);
-
-//    it.data()[0] = 0x7E;
-//    it.data()[1] = 0x00;
-//    it.data()[2] = arr.size() + 5;
-//    it.data()[3] = 0x01; //frame type
-//    it.data()[4] = 0x01; //frame ID
-//    it.data()[5] = 0x00;
-//    it.data()[6] = 0x3C;
-//    it.data()[7] = 0x00;
-//    it.push_back(arr);
-//    checkSum(it);
-//    arr = it;
-//}
-Transmit_Request_16 create_Transmit_Request_16(QByteArray &data, uint16_t receiver){
+QPair<Transmit_Request_16, uint32_t> create_Transmit_Request_16(QByteArray &data, uint16_t receiver){
 
     uint8_t sum = 0;
     Transmit_Request_16 tx;
@@ -41,7 +15,7 @@ Transmit_Request_16 create_Transmit_Request_16(QByteArray &data, uint16_t receiv
     tx.header.lenght_low = 0xFF & len;
 
     sum += tx.header.frameType = TX_REQUEST_16;
-    sum += tx.frameID = 0x01;
+    sum += tx.frameID = 0x00;
     sum += tx.dest_addr_high = 0xFF & (receiver >> 8);
     sum += tx.dest_addr_low = 0xFF & receiver;
     sum += tx.options = 0x00;
@@ -54,12 +28,22 @@ Transmit_Request_16 create_Transmit_Request_16(QByteArray &data, uint16_t receiv
         sum += tx.data[i];
     }
     tx.data[i] = 0xFF - sum;
-    return tx;
+    return qMakePair(tx, len + 4);
 }
 
-QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat){
+QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat, uint8_t *RSSI){
 
-    uint8_t len = rx.lenght_low;
+    uint16_t len = rx.lenght_high;
+    len <<= 8;
+    len += rx.lenght_low;
+
+    if(len > MAX_LEN){
+        stat = false;
+        return QByteArray();
+    }
+
+    if(RSSI)
+        *RSSI = rx.RSSI;
 
     len += 4;
 
@@ -75,9 +59,14 @@ QByteArray get_data_Receive_Package_16(Receive_Package_16 &rx, bool &stat){
         bytes.chop(1);
         return bytes;
     }
-    else {
-        stat = false;
-        return QByteArray();
-    }
+
+    stat = false;
+    return QByteArray();
+}
+
+QByteArray to_byte_array(void* ptr, uint32_t size) {
+    QByteArray data(size, 0x00);
+    memcpy(data.data(), ptr, size);
+    return data;
 }
 

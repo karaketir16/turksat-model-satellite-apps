@@ -18,17 +18,19 @@ void SerialThread::loop(){
         auto ts = tsQueue.dequeue();
         QByteArray tmp(sizeof (ts),0x00);
         memcpy(tmp.data(), &ts, sizeof (ts));
-        qDebug() << "Status: " << ts.deliveryStatus << " stat: " << tmp.toHex();
+        qDebug() << "Status: " << ts.deliveryStatus << " stat: " << tmp.toHex() << " time: " << timeoutTimer.elapsed();
         if(ts.deliveryStatus == 0x00){
             sentQueueMutex.lock();
             sentQueue.dequeue();
             sentQueueMutex.unlock();
             success++;
             qDebug() << "resended: " << resended << " remain: " << transmitQueues[1].size();
+
         }
         else{
             emit send(sentQueue.head());
             resended++;
+            timeoutTimer.restart();
         }
     }
     if(sentQueue.empty()){
@@ -42,8 +44,9 @@ void SerialThread::loop(){
             sentQueueMutex.lock();
             sentQueue.enqueue(toSent);
             sentQueueMutex.unlock();
-            qDebug() << "Send it v0.1: " << toSent.toHex();
+//            qDebug() << "Send it v0.1: " << toSent.toHex();
             emit (send(toSent));
+            timeoutTimer.restart();
         }
     }
     QTimer::singleShot(0,this, &SerialThread::loop);

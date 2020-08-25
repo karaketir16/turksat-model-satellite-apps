@@ -1,5 +1,5 @@
 #include "mainobj.h"
-
+#include "protocol.h"
 extern QString serialPortName;
 
 mainObj::mainObj(QObject *parent) : QObject(parent)
@@ -18,18 +18,19 @@ mainObj::mainObj(QObject *parent) : QObject(parent)
 
 void mainObj::receiveData(){
     qDebug() << "readyRead";
-ReRead:
-    qDebug() << "read??";
+//ReRead:
+//    qDebug() << "read??";
 //    while (serial->bytesAvailable()) {
 
 
 //    }
     QByteArray income = serial->readAll();
     incomeBuffer.append(income);
-    qDebug() << incomeBuffer.toHex();
+//    qDebug() << incomeBuffer.toHex();
 
     while(incomeBuffer.size() > 0 && incomeBuffer.data()[0] != START_DELIMITER){
-        incomeBuffer.remove(0,1);
+        auto rem = incomeBuffer.remove(0,1);
+        qDebug() << "removed: " << rem.toHex();
     }
     int bufferSize = incomeBuffer.size();
     bool cont = true;
@@ -48,10 +49,19 @@ ReRead:
                 break;
             case RX_RESPONSE_16:
                 Receive_Package_16 * rx = (Receive_Package_16 *) incomeBuffer.data();
-                auto packageLenght = rx->lenght_low + 4;
+                auto packageLenght = (((uint16_t)rx->lenght_high) << 8) + rx->lenght_low + 4;
                 if(bufferSize >= (int) packageLenght){
-                    emit receiveRX(*rx);
-                    incomeBuffer.remove(0,packageLenght);
+                    bool stat;
+                    uint8_t RSSI;
+                    auto data = get_data_Receive_Package_16(*rx, stat, &RSSI);
+                    if(stat){
+                        qDebug() << "data: " << data.toHex();
+                        emit receive(data);
+                        incomeBuffer.remove(0,packageLenght);
+                    }
+                    else
+                        incomeBuffer.remove(0,1);
+
                 }else{
                     cont = false;
                 }
@@ -63,23 +73,26 @@ ReRead:
 //    }
 }
 
-void mainObj::send(QByteArray &toSent){
-    qDebug() << "inside send, to send: " << toSent.toHex();
-    const qint64 bytesWritten = serial->write(toSent);
-    if (bytesWritten == -1) {
-        qDebug() << QObject::tr("Failed to write the data to port %1, error: %2")
-                          .arg(serialPortName).arg(serial->errorString()) << endl;
-//        return false;
-    } else if (bytesWritten != toSent.size()) {
-        qDebug() << QObject::tr("Failed to write all the data to port %1, error: %2")
-                          .arg(serialPortName).arg(serial->errorString()) << endl;
-//        return false;
-    } else if (!serial->waitForBytesWritten(1000)) {
-        qDebug() << QObject::tr("Operation timed out or an error "
-                                      "occurred for port %1, error: %2")
-                          .arg(serialPortName).arg(serial->errorString()) << endl;
-//        return false;
-    }
-        qDebug() << "Sent to uart Succeess";
+void mainObj::send(QByteArray toSent, uint16_t receiver){
+    qDebug() << "inside send, to send data: " << toSent.toHex();
+    auto sentPair = create_Transmit_Request_16(toSent,receiver);
+    qDebug() << "inside send, to send xbee: " << to_byte_array(&sentPair.first, sentPair.second).toHex();
+    const qint64 bytesWritten = serial->write(to_byte_array(&sentPair.first, sentPair.second));
+    serial->waitForBytesWritten(1000);
+//    if (bytesWritten == -1) {
+//        qDebug() << QObject::tr("Failed to write the data to port %1, error: %2")
+//                          .arg(serialPortName).arg(serial->errorString()) << endl;
+////        return false;
+//    } else if (bytesWritten != toSent.size()) {
+//        qDebug() << QObject::tr("Failed to write all the data to port %1, error: %2")
+//                          .arg(serialPortName).arg(serial->errorString()) << endl;
+////        return false;
+//    } else if (!serial->waitForBytesWritten(1000)) {
+//        qDebug() << QObject::tr("Operation timed out or an error "
+//                                      "occurred for port %1, error: %2")
+//                          .arg(serialPortName).arg(serial->errorString()) << endl;
+////        return false;
+//    }
+//        qDebug() << "Sent to uart Succeess";
 //    return true;
 }
