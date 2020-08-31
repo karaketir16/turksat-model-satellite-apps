@@ -41,6 +41,8 @@ public:
 
 public:
 
+    QString videoPath = "";
+    bool videoReady = false;
 
 
     QByteArray videoData;
@@ -58,9 +60,12 @@ public:
     uint32_t videoSenderIndex = 0;
 
 public slots:
-    void videoSender(const char* fileName);
+    void videoReadyChecker();
+    void videoSender(bool fileName);
     void loop();
-
+    void sendSeperateCarrier();
+signals:
+    void newTelemetryData(Telemetry_Data);
 };
 
 #endif // STATIONTELEMETRYOBJECT_H

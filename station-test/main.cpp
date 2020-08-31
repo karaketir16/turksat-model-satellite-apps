@@ -17,7 +17,7 @@
 
 #include <../protocol/mainobj.h>
 
-QString serialPortName = "ttyUSB1";
+QString serialPortName = "ttyUSB0";
 
 void checkSum(QByteArray& arr){
     uint8_t res = 0;
@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    qRegisterMetaType<uint16_t>("uint16_t");
+
 
 //    Transmit_Header asdasd;
 //    asdasd.startDelimiter = 0x7E;
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
 
     mainObj obj;
     StationTelemetryObject tmObj;
-    QObject::connect(&tmObj, &StationTelemetryObject::send, &obj, &mainObj::send);
+    QObject::connect(&tmObj, &StationTelemetryObject::send, &obj, &mainObj::send, Qt::BlockingQueuedConnection);
     QObject::connect(&obj, &mainObj::receive, &tmObj, &StationTelemetryObject::received_DATA);
     tmObj.start();
 

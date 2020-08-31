@@ -1,7 +1,6 @@
 QT -= gui
 QT += serialport
 
-
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
@@ -18,34 +17,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         ../protocol/abstracttelemetryobject.cpp \
+        ../protocol/telemetry_protocol.cpp \
+        SerialThread.cpp \
         ../protocol/mainobj.cpp \
         ../protocol/protocol.cpp \
-        ../protocol/telemetry_protocol.cpp \
-        arduinonanoobject.cpp \
-        bme280/bme280.c \
-        bme280/bme280_wrapper.c \
-        lsm9ds0/SFE_LSM9DS0.cpp \
         main.cpp \
-        my_i2c/my_i2c.c \
-        nano_packets.c \
-        satellitetelemetryobject.cpp \
-        test.cpp \
-        test2.cpp
+        stationtelemetryobject.cpp
 
 # Default rules for deployment.
-target.path = /usr/bin
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    arduinonanoobject.h \
-    nano_packets.h \
     ../protocol/abstracttelemetryobject.h \
+    ../protocol/telemetry_protocol.h \
+    SerialThread.h \
     ../protocol/mainobj.h \
     ../protocol/protocol.h \
-    ../protocol/telemetry_protocol.h \
-    bme280/bme280.h \
-    bme280/bme280_defs.h \
-    bme280/bme280_wrapper.h \
-    lsm9ds0/SFE_LSM9DS0.h \
-    my_i2c/my_i2c.h \
-    satellitetelemetryobject.h
+    stationtelemetryobject.h
+

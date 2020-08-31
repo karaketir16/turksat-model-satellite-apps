@@ -1,5 +1,6 @@
 #include "mainobj.h"
 #include "protocol.h"
+#include <QDebug>
 extern QString serialPortName;
 
 mainObj::mainObj(QObject *parent) : QObject(parent)
@@ -15,9 +16,10 @@ mainObj::mainObj(QObject *parent) : QObject(parent)
     connect(serial, &QSerialPort::readyRead, this, &mainObj::receiveData);
 }
 
+uint8_t RSSI;
 
 void mainObj::receiveData(){
-    qDebug() << "readyRead";
+//    qDebug() << "readyRead";
 //ReRead:
 //    qDebug() << "read??";
 //    while (serial->bytesAvailable()) {
@@ -52,10 +54,10 @@ void mainObj::receiveData(){
                 auto packageLenght = (((uint16_t)rx->lenght_high) << 8) + rx->lenght_low + 4;
                 if(bufferSize >= (int) packageLenght){
                     bool stat;
-                    uint8_t RSSI;
+//                    uint8_t RSSI;
                     auto data = get_data_Receive_Package_16(*rx, stat, &RSSI);
                     if(stat){
-                        qDebug() << "data: " << data.toHex();
+//                        qDebug() << "data: " << data.toHex();
                         emit receive(data);
                         incomeBuffer.remove(0,packageLenght);
                     }
@@ -74,9 +76,9 @@ void mainObj::receiveData(){
 }
 
 void mainObj::send(QByteArray toSent, uint16_t receiver){
-    qDebug() << "inside send, to send data: " << toSent.toHex();
+//    qDebug() << "inside send, to send data: " << toSent.toHex();
     auto sentPair = create_Transmit_Request_16(toSent,receiver);
-    qDebug() << "inside send, to send xbee: " << to_byte_array(&sentPair.first, sentPair.second).toHex();
+//    qDebug() << "inside send, to send xbee: " << to_byte_array(&sentPair.first, sentPair.second).toHex();
     const qint64 bytesWritten = serial->write(to_byte_array(&sentPair.first, sentPair.second));
     serial->waitForBytesWritten(1000);
 //    if (bytesWritten == -1) {

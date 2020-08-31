@@ -1,6 +1,7 @@
 #include "stationtelemetryobject.h"
 #include <QFile>
 #include <string.h>
+#include <QFileInfo>
 StationTelemetryObject::StationTelemetryObject()
 {
     receiver = 0x003C;
@@ -8,28 +9,47 @@ StationTelemetryObject::StationTelemetryObject()
 
 void StationTelemetryObject::run(){
 
-    QTimer::singleShot(0, [&](){
-        videoSender("./test.mp4");
+    QTimer::singleShot(500, [&](){
+        videoReadyChecker();
     });
 
-//    QTimer::singleShot(1000, [&](){
-//        Command cmd;
-//        cmd.header.type = PACKAGE_Command;
-//        cmd.command = COMMAND_Seperate_Carrier;
-//        reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//    });
     this->exec();
 }
 
 #define PARTSIZE 50 //TODO
 
-void StationTelemetryObject::videoSender(const char* fileName = nullptr){
+void StationTelemetryObject::sendSeperateCarrier(){
+    Command cmd;
+    cmd.header.type = PACKAGE_Command;
+    cmd.command = COMMAND_Seperate_Carrier;
+//    Q_ASSERT(false);
+    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+    qDebug() <<"carrier Send";
+//    Q_ASSERT(false);
+}
 
+void StationTelemetryObject::videoReadyChecker(){
+    if( ! this->videoReady){
+        QTimer::singleShot(500, [&](){
+            videoReadyChecker();
+        });
+    }
+    else {
+        QTimer::singleShot(0, [&](){
+            videoSender(true);
+        });
+    }
     //not send
+}
+
+void StationTelemetryObject::videoSender(bool firstTime){
+
+
 //    return;
 
-    if(fileName != nullptr){
-        QFile file(fileName);
+    if(firstTime){
+        qDebug() <<"FileName: " << videoPath;
+        QFile file(videoPath);
         if( ! file.open(QIODevice::ReadOnly)){
             qDebug() << "Cannot Open";
         }
@@ -50,7 +70,9 @@ void StationTelemetryObject::videoSender(const char* fileName = nullptr){
 
         Set_Video_Name svn;
         svn.header.type = PACKAGE_Set_Video_Name;
-        strcpy((char *)svn.name, fileName);
+        videoPath = QFileInfo(file).fileName();
+        Q_ASSERT(videoPath.size() < 25);
+        strcpy((char *)svn.name, videoPath.toStdString().c_str());
         svn.video_packet_count = videoPartCount;
 
         videoSetTelemNumber = reSender(to_byte_array(&svn, sizeof (svn)));
@@ -113,7 +135,7 @@ void StationTelemetryObject::videoSender(const char* fileName = nullptr){
 
     if(lastPoint != videoPartCount){
         QTimer::singleShot(0, [&](){
-            videoSender();
+            videoSender(false);
         });
     }else{
         qDebug() << "Sender Done!";
@@ -141,6 +163,7 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
     qDebug() << "Gps FIX: " << data.GPS_fix;
     qDebug() <<"+++++++++++++++++++++++++++++++++";
 
+    emit newTelemetryData(data);
 //    qDebug() <<
     //TODO
 }

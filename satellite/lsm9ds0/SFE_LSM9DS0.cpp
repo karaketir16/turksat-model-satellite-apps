@@ -22,6 +22,7 @@ Distributed as-is; no warranty is given.
 ******************************************************************************/
 
 #include "SFE_LSM9DS0.h"
+#include <math.h>
 //#include <Wire.h> // Wire library is used for I2C
 //#include <SPI.h>  // SPI library is used for...SPI.
 
@@ -700,3 +701,79 @@ void LSM9DS0::I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest, 
     }
 //    i2c_read_buff(file,address,subAddress,dest,count);
 }
+
+
+tripleFloat lsm9ds0_getGyro()
+{
+  dof.readGyro();
+  return tripleFloat({dof.calcGyro(dof.gx),
+                dof.calcGyro(dof.gy),
+                dof.calcGyro(dof.gz)});
+}
+tripleFloat lsm9ds0_getAccel()
+{
+  dof.readAccel();
+  return tripleFloat({dof.calcAccel(dof.ax),
+                dof.calcAccel(dof.ay),
+                dof.calcAccel(dof.az)});
+}
+tripleFloat lsm9ds0_getMag()
+{
+  dof.readMag();
+  return tripleFloat({dof.calcMag(dof.mx),
+                dof.calcMag(dof.my),
+                dof.calcMag(dof.mz)});
+}
+
+float lsm9ds0_getPitch()
+{
+  float pitch;
+  float x = dof.calcAccel(dof.ax), y = dof.calcAccel(dof.ay),
+                     z = dof.calcAccel(dof.az);
+
+  pitch = atan2(x, sqrt(y * y) + (z * z));
+  pitch *= 180.0 / M_PI;
+
+  return pitch;
+}
+
+float lsm9ds0_getRoll()
+{
+  float roll;
+  float x = dof.calcAccel(dof.ax), y = dof.calcAccel(dof.ay),
+                     z = dof.calcAccel(dof.az);
+
+  roll = atan2(y, sqrt(x * x) + (z * z));
+  roll *= 180.0 / M_PI;
+  return roll;
+}
+
+
+float lsm9ds0_getHeading(){
+    float heading;
+    float hx = dof.mx, hy = dof.my;
+
+    if (hy > 0)
+    {
+      heading = 90 - (atan(hx / hy) * (180 / M_PI));
+    }
+    else if (hy < 0)
+    {
+      heading = - (atan(hx / hy) * (180 / M_PI));
+    }
+    else // hy = 0
+    {
+      if (hx < 0) heading = 180;
+      else heading = 0;
+    }
+
+    return heading;
+}
+
+void lsm9ds0_readAll(){
+    dof.readMag();
+    dof.readGyro();
+    dof.readTemp();
+    dof.readAccel();
+}
+

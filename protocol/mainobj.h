@@ -4,7 +4,7 @@
 #include <QObject>
 #include "../protocol/protocol.h"
 #include <QQueue>
-#include <QtSerialPort>
+#include <QSerialPort>
 
 class mainObj : public QObject
 {

@@ -34,6 +34,14 @@ extern "C" {
     #include <string.h>
 }
 
+typedef struct tripleFloat {
+    float x;
+    float y;
+    float z;
+} tripleFloat;
+
+
+
 
 ////////////////////////////
 // LSM9DS0 Gyro Registers //
@@ -260,7 +268,7 @@ public:
 	// Use the return value of this function to verify communication.
 	uint16_t begin(gyro_scale gScl = G_SCALE_245DPS, 
 				accel_scale aScl = A_SCALE_2G, mag_scale mScl = M_SCALE_2GS,
-				gyro_odr gODR = G_ODR_95_BW_125, accel_odr aODR = A_ODR_50, 
+                gyro_odr gODR = G_ODR_95_BW_125, accel_odr aODR = A_ODR_50,
                 mag_odr mODR = M_ODR_50, const char * path = "/dev/i2c-0");
 	
 	// readGyro() -- Read the gyroscope output registers.
@@ -561,5 +569,18 @@ private:
 	// 		all stored in the *dest array given.
 	void I2CreadBytes(uint8_t address, uint8_t subAddress, uint8_t * dest, uint8_t count);
 };
+
+
+extern LSM9DS0 dof;
+
+tripleFloat lsm9ds0_getGyro();
+tripleFloat lsm9ds0_getAccel();
+tripleFloat lsm9ds0_getMag();
+
+float lsm9ds0_getPitch();
+float lsm9ds0_getRoll();
+float lsm9ds0_getHeading();
+
+void lsm9ds0_readAll();
 
 #endif // SFE_LSM9DS0_H //

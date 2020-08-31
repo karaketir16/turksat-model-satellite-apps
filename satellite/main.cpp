@@ -33,6 +33,8 @@ extern "C" {
 }
 
 #include "satellitetelemetryobject.h"
+#include "arduinonanoobject.h"
+#include "./lsm9ds0/SFE_LSM9DS0.h"
 
 void loop();
 void setup();
@@ -40,10 +42,14 @@ void setup();
 #define pinCtl_BTN "0"
 
 QByteArray getted;
-QString serialPortName = "ttyUSB0";
+QString serialPortName = "ttyS1";
+QString serialPortNameNano = "ttyUSB0";
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    qRegisterMetaType<uint16_t>("uint16_t");
+
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     qDebug() << "Little";
@@ -56,16 +62,47 @@ qDebug() << "Big";
 //    int file = I2C_init("/dev/i2c-0");
 //    qDebug() << "asd: "<< i2c_read_buff(file,0xd6,0x0f,&asd,1);
 //    qDebug() << asd;
+
+QProcess::execute("omega2-ctrl gpiomux set pwm1 pwm");
+
+
+
+
 //    setup();
 //    while(1) loop();
     qDebug() << sizeof (float);
 
+//    uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
+//                                dof.A_SCALE_16G, dof.M_SCALE_2GS,
+//                                dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100);
+
+//    qDebug() << status;
+//    qDebug() << "Should be " << 0x49D4;
+//    Q_ASSERT(status == 0x49D4);
+//    QTimer tm;
+//    tm.setInterval(100);
+//    tm.start();
+//    QObject::connect(&tm, &QTimer::timeout,[&](){
+//        QElapsedTimer timer;
+//        timer.start();
+//        lsm9ds0_readAll();
+//        qDebug() << "Read Time: " << timer.elapsed() <<"ms";
+//        qDebug() << "Heading  : " <<lsm9ds0_getHeading();
+//        qDebug() << "pitch    : " <<lsm9ds0_getPitch();
+//        qDebug() << "roll     : " <<lsm9ds0_getRoll();
+//        qDebug() << "----------------------------" ;
+//    });
 
     mainObj obj;
     SatelliteTelemetryObject tmObj;
+    ArduinoNanoObject ardn;
+    QObject::connect(&ardn, &ArduinoNanoObject::receive, &tmObj, &SatelliteTelemetryObject::received_Nano_Package);
     QObject::connect(&tmObj, &SatelliteTelemetryObject::send, &obj, &mainObj::send);
     QObject::connect(&obj, &mainObj::receive, &tmObj, &SatelliteTelemetryObject::received_DATA);
     tmObj.start();
+
+
+
 
 //    int fff = 0;
 //    fff = open("/sys/class/gpio/export", O_WRONLY);
@@ -111,7 +148,8 @@ qDebug() << "Big";
 
 //    mainObj mmm;
 //    bool once = true;
-//    QFile file("../getted.avi");
+//    QFile file;//("../getted.avi");
+//    file.setFileName()
 //    if( ! file.open(QIODevice::ReadWrite | QIODevice::Truncate)){
 //        qDebug() << "Cannot Open";
 //    }

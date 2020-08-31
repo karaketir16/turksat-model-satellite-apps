@@ -69,6 +69,7 @@ Distributed as-is; no warranty is given.
 #include <lsm9ds0/SFE_LSM9DS0.h>
 #include <unistd.h>
 #include <QDebug>
+#include <math.h>
 
 ///////////////////////
 // Example I2C Setup //
@@ -99,15 +100,22 @@ LSM9DS0 dof(MODE_SPI, LSM9DS0_CSG, LSM9DS0_CSXM);
 
 #define PRINT_SPEED 500 // 500 ms between prints
 
+void   printHeading(float,float);
+
 void setup()
 {
 //  Serial.begin(115200); // Start serial at 115200 bps
 //  // Use the begin() function to initialize the LSM9DS0 library.
 //  // You can either call it with no parameters (the easy way):
-  uint16_t status = dof.begin();
+//  uint16_t status = dof.begin();
 //  // Or call it with declarations for sensor scales and data rates:
-//  //uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
-//  //                            dof.A_SCALE_6G, dof.M_SCALE_2GS);
+  uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
+                              dof.A_SCALE_16G, dof.M_SCALE_2GS,
+                              dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100);
+
+//  uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
+//                              dof.A_SCALE_16G, dof.M_SCALE_2GS,
+//                              dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100);
 
 //  // begin() returns a 16-bit value which includes both the gyro
 //  // and accelerometers WHO_AM_I response. You can check this to
@@ -115,10 +123,15 @@ void setup()
 //  qDebug() << ("LSM9DS0 WHO_AM_I's returned: 0x");
   qDebug() << status;
   qDebug() << "Should be " << 0x49D4;
-  usleep(2 * 1000 * 1000);
+
+//  qDebug() << "Heading: " <<getHeading();
+//  qDebug() <<"IT: ";
+//  printHeading((float) dof.mx, (float) dof.my);
+//  qDebug() << "pitch: " <<getPitch();
+//  qDebug() << "roll: " <<getRoll();
+//  usleep( 200 * 1000);
 //  qDebug() << ln();
 }
-
 
 void printGyro()
 {
@@ -161,6 +174,10 @@ void printAccel()
 
 }
 
+
+
+
+
 void printMag()
 {
   // To read from the magnetometer, you must first call the
@@ -181,13 +198,15 @@ void printMag()
 #endif
 }
 
+
+
 // Here's a fun function to calculate your heading, using Earth's
 // magnetic field.
 // It only works if the sensor is flat (z-axis normal to Earth).
 // Additionally, you may need to add or subtract a declination
 // angle to get the heading normalized to your location.
 // See: http://www.ngdc.noaa.gov/geomag/declination.shtml
-#include <math.h>
+
 
 void printHeading(float hx, float hy)
 {
@@ -210,6 +229,8 @@ void printHeading(float hx, float hy)
   qDebug() << "Heading: " << heading;
 }
 
+
+
 // Another fun function that does calculations based on the
 // acclerometer data. This function will print your LSM9DS0's
 // orientation -- it's roll and pitch angles.
@@ -228,6 +249,9 @@ void printOrientation(float x, float y, float z)
 
   qDebug() << "Pitch, Roll, Yaw: "<< pitch << ", " << roll << ", " << yaw;
 }
+
+
+
 void loop()
 {
   printGyro();  // Print "G: gx, gy, gz"
