@@ -42,7 +42,7 @@ uint32_t AbstractTelemetryObject::reSender(QByteArray data, uint8_t resend, uint
 
             QTimer::singleShot(30, [this,data](){ // resend
                 reSender(data, true, false);
-                qDebug() << "Resend";
+//                qDebug() << "Resend";
             });
         }
 
@@ -107,7 +107,7 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
                 received_PACKAGE_ACK(*((ACK*)DATA.data()));
             break;
             case PACKAGE_Command:
-                received_COMMAND(((Command*)DATA.data())->command);
+                received_COMMAND(((Command*)DATA.data())->command, ((Command*)DATA.data())->data);
             break;
             case PACKAGE_Set_Video_Name:
                 received_PACKAGE_Set_Video_Name(*((Set_Video_Name*)DATA.data()));
@@ -123,22 +123,28 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
 }
 
 
-void AbstractTelemetryObject::received_COMMAND(uint8_t COMMAND){
+void AbstractTelemetryObject::received_COMMAND(uint8_t COMMAND, uint8_t data){
     switch (COMMAND) {
         case COMMAND_Altitude_Calibrate:
-            received_COMMAND_Altitude_Calibrate();
+            received_COMMAND_Altitude_Calibrate(data);
         break;
         case COMMAND_Seperate_Carrier:
-            received_COMMAND_Seperate_Carrier();
+            received_COMMAND_Seperate_Carrier(data);
         break;
         case COMMAND_Reset_Telemetry_Number:
-            received_COMMAND_Reset_Telemetry_Number();
+            received_COMMAND_Reset_Telemetry_Number(data);
         break;
         case COMMAND_Set_ManuelThrust_off:
-            received_COMMAND_Set_ManuelThrust_off();
+            received_COMMAND_Set_ManuelThrust_off(data);
         break;
         case COMMAND_Set_ManuelThrust_on:
-            received_COMMAND_Set_ManuelThrust_on();
+            received_COMMAND_Set_ManuelThrust_on(data);
+        break;
+        case COMMAND_Set_Thrust:
+            received_COMMAND_Set_Thrust(data);
+        break;
+        case COMMAND_Set_Seperator:
+            received_COMMAND_Set_Seperator(data);
         break;
     }
 }

@@ -9,6 +9,8 @@
 #include <qwt_symbol.h>
 #include <stationtelemetryobject.h>
 
+class StationTelemetryObject;
+
 struct PlotStruct {
     QwtPlot *       ptr;
     QwtPlotGrid *    grid;
@@ -57,6 +59,10 @@ private slots:
 
     void on_seperateCommand_clicked();
 
+    void on_engineSlider_valueChanged(int value);
+
+    void on_seperatorSlider_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
     QTimer tm;
@@ -71,6 +77,8 @@ public slots:
 signals:
         void sendVideo(const char *);
         void seperateCarrier();
+        void setSeperator(uint8_t);
+        void setEngineThrust(uint8_t);
 
 };
 #endif // MAINWINDOW_H

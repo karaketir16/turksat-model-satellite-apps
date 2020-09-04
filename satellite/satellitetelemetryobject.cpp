@@ -1,10 +1,12 @@
 #include "satellitetelemetryobject.h"
 
-#define VIDEO_PATH "/mnt/mmcblk0p1/"
+#define VIDEO_PATH "/"
+
+#include <math.h>
 
 SatelliteTelemetryObject::SatelliteTelemetryObject()
 {
-    receiver = 0x0037;
+    receiver = 0x003C;
 }
 
 void SatelliteTelemetryObject::run(){
@@ -23,7 +25,7 @@ void SatelliteTelemetryObject::run(){
 
     uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
                                 dof.A_SCALE_16G, dof.M_SCALE_2GS,
-                                dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100);
+                                dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100, "/dev/i2c-1");
 
     lsmStatus = (0x49D4 == status);
 
@@ -42,6 +44,7 @@ void SatelliteTelemetryObject::run(){
         Telemetry_update.yaw = lsm9ds0_getHeading();
         Telemetry_update.roll = lsm9ds0_getRoll();
         Telemetry_update.pitch = lsm9ds0_getPitch();
+        qDebug() << "Heading, roll, pitch" << Telemetry_update.yaw << Telemetry_update.roll << Telemetry_update.pitch;
     });
 
 
@@ -59,6 +62,7 @@ void SatelliteTelemetryObject::run(){
 }
 
 void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
+    /*
     qDebug() << "recevied Lat: " << np.gps_latitude;
     qDebug() << "recevied Long: " << np.gps_longtitude;
     qDebug() << "recevied Alt: " << np.gps_altitude;
@@ -68,7 +72,9 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     qDebug() << "recevied seconds: " << np.second;
     qDebug() << "received pressure: " << np.pressure;
     qDebug() << "received voltage: " << np.voltage;
+    qDebug() << "Temp : " << np.temp;
     qDebug() << "-----------------";
+    */
     Telemetry_update.day = np.day;
     Telemetry_update.hour = np.hour;
     Telemetry_update.year = np.year;
@@ -82,6 +88,9 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.voltage = np.voltage;
     Telemetry_update.temperature = np.temp;
     Telemetry_update.GPS_fix = np.gps_fix;
+    auto powed = pow((pressure0 / np.pressure),(1/5.257)) - 1;
+    Telemetry_update.height = (powed * (np.temp + 273.15)) / 0.00065;
+//    qDebug() << "powed: " << powed << " Calculated Height" << Telemetry_update.height;
 }
 
 
@@ -153,31 +162,47 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vi
 }
 
 
-void SatelliteTelemetryObject::received_COMMAND_Altitude_Calibrate(){
+void SatelliteTelemetryObject::received_COMMAND_Altitude_Calibrate(uint8_t data){
     groundAltitude = Telemetry_update.gps_altiude;
     groundPressure = Telemetry_update.pressure;
 }
-void SatelliteTelemetryObject::received_COMMAND_Seperate_Carrier(){
-    QProcess::execute("onion pwm 1 13.7 100");
+void SatelliteTelemetryObject::received_COMMAND_Seperate_Carrier(uint8_t data){
+//    QProcess::execute("onion pwm 1 13.7 100");
+    QString str = QString("gpio -g pwm ") + QString(" 12 ") + QString::number((int) SEPERATOR_SEPERATED);
+    QProcess::execute(str);
 //    Q_ASSERT(false);
 //    usleep(10000000000);
 
 }
-void SatelliteTelemetryObject::received_COMMAND_Reset_Telemetry_Number(){
+void SatelliteTelemetryObject::received_COMMAND_Reset_Telemetry_Number(uint8_t data){
     telemetry_number_counter = 0;
     //TODO do file operations
 }
-void SatelliteTelemetryObject::received_COMMAND_Reset_Package_Number(){
+void SatelliteTelemetryObject::received_COMMAND_Reset_Package_Number(uint8_t data){
     Telemetry_update.package_number = 0;
     //TODO do file operations
 }
-void SatelliteTelemetryObject::received_COMMAND_Set_ManuelThrust_off(){
+void SatelliteTelemetryObject::received_COMMAND_Set_ManuelThrust_off(uint8_t data){
     manuelThrust = false;
 }
-void SatelliteTelemetryObject::received_COMMAND_Set_ManuelThrust_on(){
+void SatelliteTelemetryObject::received_COMMAND_Set_ManuelThrust_on(uint8_t data){
     manuelThrust = true;
 }
+void SatelliteTelemetryObject::received_COMMAND_Set_Thrust(uint8_t data){
+    auto step = (MAX_THRUST - MIN_THRUST) / 100.0;
+    auto res = MIN_THRUST + (step * data);
+    QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) res);
 
+    QProcess::execute(str);
+}
+void SatelliteTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
+    auto step = (SEPERATOR_SEPERATED - SEPERATOR_NOT_SEPERATED) / 100.0;
+    auto res = SEPERATOR_NOT_SEPERATED + (step * data);
+//     = "onion pwm 1 " + QString::number(res,'f',2) + " 100";
+    QString str = QString("gpio -g pwm ") + QString(" 12 ") + QString::number((int) res);
+    QProcess::execute(str);
+    qDebug() <<"data: " << data << "#### " << str;
+}
 void SatelliteTelemetryObject::loop(){ //Update to toSent
 
 

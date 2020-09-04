@@ -42,7 +42,7 @@ void setup();
 #define pinCtl_BTN "0"
 
 QByteArray getted;
-QString serialPortName = "ttyS1";
+QString serialPortName = "ttyS0";
 QString serialPortNameNano = "ttyUSB0";
 int main(int argc, char *argv[])
 {
@@ -63,9 +63,24 @@ qDebug() << "Big";
 //    qDebug() << "asd: "<< i2c_read_buff(file,0xd6,0x0f,&asd,1);
 //    qDebug() << asd;
 
-QProcess::execute("omega2-ctrl gpiomux set pwm1 pwm");
+//QProcess::execute("omega2-ctrl gpiomux set pwm1 pwm");
+//QProcess::execute("omega2-ctrl gpiomux set pwm0 pwm");
+////QProcess::execute("omega2-ctrl gpiomux set pwm0 pwm");
+QProcess::execute("gpio -g mode 12 pwm");
+QProcess::execute("gpio pwm-ms");
+QProcess::execute("gpio pwmc 192");
+QProcess::execute("gpio pwmr 2000");
+QProcess::execute("gpio -g pwm 12 85");
 
+usleep(1000 * 500);
 
+QProcess::execute("gpio -g mode 13 pwm");
+QProcess::execute("gpio pwm-ms");
+QProcess::execute("gpio pwmc 192");
+QProcess::execute("gpio pwmr 2000");
+QProcess::execute("gpio -g pwm 13 90");
+
+usleep(1000 * 500);
 
 
 //    setup();

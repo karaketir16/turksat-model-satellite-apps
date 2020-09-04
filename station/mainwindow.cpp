@@ -152,6 +152,9 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::newTelemetryData(Telemetry_Data data){
+
+//    Q_ASSERT(false);
+
     auto rePlot = [&](PlotStruct &strc){
         strc.curve->setSamples(strc.points);
         strc.ptr->replot();
@@ -254,4 +257,14 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_seperateCommand_clicked()
 {
     emit seperateCarrier();
+}
+
+void MainWindow::on_engineSlider_valueChanged(int value)
+{
+    emit setEngineThrust(value);
+}
+
+void MainWindow::on_seperatorSlider_valueChanged(int value)
+{
+    emit setSeperator(value);
 }

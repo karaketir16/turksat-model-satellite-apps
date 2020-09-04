@@ -6,7 +6,8 @@ void calcChecksum(nano_package* np){
     uint8_t * data = (uint8_t *) np;
 
     uint16_t tot=0;
-    for(int i =0; i < len; i++){
+    int i =0;
+    for(; i < len; i++){
         tot += data[i];
     }
     np->checksum = 0xFFFF - tot;
@@ -18,7 +19,8 @@ uint8_t ckeckChecksum(nano_package* np){
     uint8_t * data = (uint8_t *) np;
 
     uint16_t tot=0;
-    for(int i =0; i < len - 2; i++){
+    int i =0;
+    for(; i < len - 2; i++){
         tot += data[i];
     }
     return tot == np-> checksum;

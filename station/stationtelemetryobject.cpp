@@ -4,13 +4,21 @@
 #include <QFileInfo>
 StationTelemetryObject::StationTelemetryObject()
 {
-    receiver = 0x003C;
+    receiver = 0x0037;
 }
 
 void StationTelemetryObject::run(){
 
+
+    StationTelemetryObject tmObj;
     QTimer::singleShot(500, [&](){
         videoReadyChecker();
+    });
+
+    QTimer::singleShot(0, [&](){
+        xBee = new mainObj();
+        QObject::connect(&tmObj, &StationTelemetryObject::send, xBee, &mainObj::send);
+        QObject::connect(xBee, &mainObj::receive, &tmObj, &StationTelemetryObject::received_DATA);
     });
 
     this->exec();
@@ -26,6 +34,23 @@ void StationTelemetryObject::sendSeperateCarrier(){
     reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
     qDebug() <<"carrier Send";
 //    Q_ASSERT(false);
+}
+
+
+void StationTelemetryObject::sendSetSeperator(uint8_t data){
+    Command cmd;
+    cmd.header.type = PACKAGE_Command;
+    cmd.command = COMMAND_Set_Seperator;
+    cmd.data = data;
+    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+    qDebug() << "DATA: " << data;
+}
+void StationTelemetryObject::sendSetEngineThrust(uint8_t data){
+    Command cmd;
+    cmd.header.type = PACKAGE_Command;
+    cmd.command = COMMAND_Set_Thrust;
+    cmd.data = data;
+    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
 }
 
 void StationTelemetryObject::videoReadyChecker(){
@@ -161,9 +186,10 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
     qDebug() << "Voltage: " << data.voltage;
     qDebug() << "Temperature: " << data.temperature;
     qDebug() << "Gps FIX: " << data.GPS_fix;
+    qDebug() << "Height: " << data.height;
     qDebug() <<"+++++++++++++++++++++++++++++++++";
 
-    emit newTelemetryData(data);
+    wind->newTelemetryData(data);
 //    qDebug() <<
     //TODO
 }
@@ -190,21 +216,27 @@ void StationTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vide
 }
 
 
-void StationTelemetryObject::received_COMMAND_Altitude_Calibrate(){
+void StationTelemetryObject::received_COMMAND_Altitude_Calibrate(uint8_t data){
     //Not Implemented
 }
-void StationTelemetryObject::received_COMMAND_Seperate_Carrier(){
+void StationTelemetryObject::received_COMMAND_Seperate_Carrier(uint8_t data){
     //Not Implemented
 }
-void StationTelemetryObject::received_COMMAND_Reset_Telemetry_Number(){
+void StationTelemetryObject::received_COMMAND_Reset_Telemetry_Number(uint8_t data){
     //Not Implemented
 }
-void StationTelemetryObject::received_COMMAND_Reset_Package_Number(){
+void StationTelemetryObject::received_COMMAND_Reset_Package_Number(uint8_t data){
     //Not Implemented
 }
-void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_off(){
+void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_off(uint8_t data){
     //Not Implemented
 }
-void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_on(){
+void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_on(uint8_t data){
     //Not Implemented
+}
+void StationTelemetryObject::received_COMMAND_Set_Thrust(uint8_t data){
+
+}
+void StationTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
+
 }

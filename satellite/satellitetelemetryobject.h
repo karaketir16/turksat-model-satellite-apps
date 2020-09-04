@@ -28,12 +28,14 @@ public:
     void received_PACKAGE_Video_Data(Video_Data video_data) override;
     void received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK) override;
 
-    void received_COMMAND_Altitude_Calibrate() override;
-    void received_COMMAND_Seperate_Carrier() override;
-    void received_COMMAND_Reset_Telemetry_Number() override;
-    void received_COMMAND_Reset_Package_Number() override;
-    void received_COMMAND_Set_ManuelThrust_off() override;
-    void received_COMMAND_Set_ManuelThrust_on() override;
+    void received_COMMAND_Altitude_Calibrate(uint8_t) override;
+    void received_COMMAND_Seperate_Carrier(uint8_t) override;
+    void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
+    void received_COMMAND_Reset_Package_Number(uint8_t) override;
+    void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
+    void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
+    void received_COMMAND_Set_Thrust(uint8_t) override;
+    void received_COMMAND_Set_Seperator(uint8_t) override;
 
     QByteArray Telemetry_sendThis;
     Telemetry_Data Telemetry_update;
@@ -48,7 +50,7 @@ public:
 
     uint16_t team_no = 53402;
 
-    bool manuelThrust = 0;
+    bool manuelThrust = true; // SET false this
 
     QFile videoFile;
     uint32_t expectedVideoParts = 0;
@@ -69,7 +71,7 @@ public:
     uint8_t telemetryRefresh = 0;
 //    uint8_t tele;
 
-
+    float pressure0 = 1001.84;
 
 public slots:
     void loop();

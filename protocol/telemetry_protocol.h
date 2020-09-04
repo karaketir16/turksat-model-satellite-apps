@@ -32,9 +32,21 @@
 #define COMMAND_Reset_Package_Number    0x24
 #define COMMAND_Set_ManuelThrust_off    0x25
 #define COMMAND_Set_ManuelThrust_on     0x26
+#define COMMAND_Set_Thrust              0x27
+#define COMMAND_Set_Seperator           0x28
 
 
 #define STATUS_                         0x41
+
+
+#define MIN_THRUST                      90
+#define MAX_THRUST                      190 //can be larger, 21 or 22 not sure
+
+#define SEPERATOR_SEPERATED                   132
+#define SEPERATOR_NOT_SEPERATED               85
+
+
+
 
 typedef struct __attribute__((packed)) Telemetry_Header {
     uint32_t telemetry_number;
@@ -88,6 +100,7 @@ typedef struct __attribute__((packed)) ACK {
 typedef struct __attribute__((packed)) Command {
     Telemetry_Header header;
     uint8_t command;
+    uint8_t data;
     uint8_t crca;
     uint8_t crcb;
 } Command;
@@ -116,12 +129,12 @@ typedef struct __attribute__((packed)) Video_Data_ACK {
     uint8_t crcb;
 } Video_Data_ACK;
 
-typedef struct __attribute__((packed)) Set_Thrust {
-    Telemetry_Header header;
-    uint8_t thrust;
-    uint8_t crca;
-    uint8_t crcb;
-} Set_Thrust;
+//typedef struct __attribute__((packed)) Set_Thrust {
+//    Telemetry_Header header;
+//    uint8_t thrust;
+//    uint8_t crca;
+//    uint8_t crcb;
+//} Set_Thrust;
 
 
 void crc_fill(uint8_t * buff, uint8_t len);

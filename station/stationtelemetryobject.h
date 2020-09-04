@@ -11,12 +11,16 @@
 
 #include "../protocol/abstracttelemetryobject.h"
 #include "../protocol/telemetry_protocol.h"
+#include "../protocol/mainobj.h"
 #include <queue>
 #include <QPair>
 #include <QThread>
 #include <QTimer>
 #include <QDebug>
 #include <QFile>
+#include "mainwindow.h"
+
+class MainWindow;
 
 class StationTelemetryObject : public AbstractTelemetryObject
 {
@@ -32,12 +36,15 @@ public:
 
 
 
-    void received_COMMAND_Altitude_Calibrate() override;
-    void received_COMMAND_Seperate_Carrier() override;
-    void received_COMMAND_Reset_Telemetry_Number() override;
-    void received_COMMAND_Reset_Package_Number() override;
-    void received_COMMAND_Set_ManuelThrust_off() override;
-    void received_COMMAND_Set_ManuelThrust_on() override;
+    void received_COMMAND_Altitude_Calibrate(uint8_t) override;
+    void received_COMMAND_Seperate_Carrier(uint8_t) override;
+    void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
+    void received_COMMAND_Reset_Package_Number(uint8_t) override;
+    void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
+    void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
+    void received_COMMAND_Set_Thrust(uint8_t) override;
+    void received_COMMAND_Set_Seperator(uint8_t) override;
+
 
 public:
 
@@ -59,11 +66,18 @@ public:
 
     uint32_t videoSenderIndex = 0;
 
+
+    mainObj * xBee;
+
+    MainWindow * wind;
+
 public slots:
     void videoReadyChecker();
     void videoSender(bool fileName);
     void loop();
     void sendSeperateCarrier();
+    void sendSetSeperator(uint8_t);
+    void sendSetEngineThrust(uint8_t);
 signals:
     void newTelemetryData(Telemetry_Data);
 };

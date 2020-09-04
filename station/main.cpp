@@ -35,20 +35,22 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<uint16_t>("uint16_t");
 
-    mainObj obj;
+
     StationTelemetryObject tmObj;
-    QObject::connect(&tmObj, &StationTelemetryObject::send, &obj, &mainObj::send, Qt::BlockingQueuedConnection);
-    QObject::connect(&obj, &mainObj::receive, &tmObj, &StationTelemetryObject::received_DATA);
-    tmObj.start();
+//    tmObj.start();
 
 
     MainWindow w;
     w.stationTelemetryObject = &tmObj;
     w.show();
+//    tmObj.wind = &w;
 
     QObject::connect(&tmObj, &StationTelemetryObject::newTelemetryData, &w, &MainWindow::newTelemetryData);
 //    QObject::connect(&w, &MainWindow::sendVideo, &tmObj, &StationTelemetryObject::videoSender, Qt::QueuedConnection);
-//    QObject::connect(&w, &MainWindow::seperateCarrier, &tmObj, &StationTelemetryObject::sendSeperateCarrier);
+
+    QObject::connect(&w, &MainWindow::seperateCarrier, &tmObj, &StationTelemetryObject::sendSeperateCarrier);
+    QObject::connect(&w, &MainWindow::setSeperator, &tmObj, &StationTelemetryObject::sendSetSeperator);
+    QObject::connect(&w, &MainWindow::setEngineThrust, &tmObj, &StationTelemetryObject::sendSetEngineThrust);
 
     return a.exec();
 }

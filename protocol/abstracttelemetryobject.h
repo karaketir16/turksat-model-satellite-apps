@@ -25,12 +25,16 @@ public:
     virtual void received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK) = 0;
 
 
-    virtual void received_COMMAND_Altitude_Calibrate() = 0;
-    virtual void received_COMMAND_Seperate_Carrier() = 0;
-    virtual void received_COMMAND_Reset_Telemetry_Number() = 0;
-    virtual void received_COMMAND_Reset_Package_Number() = 0;
-    virtual void received_COMMAND_Set_ManuelThrust_off() = 0;
-    virtual void received_COMMAND_Set_ManuelThrust_on() = 0;
+    virtual void received_COMMAND_Altitude_Calibrate(uint8_t) = 0;
+    virtual void received_COMMAND_Seperate_Carrier(uint8_t) = 0;
+    virtual void received_COMMAND_Reset_Telemetry_Number(uint8_t) = 0;
+    virtual void received_COMMAND_Reset_Package_Number(uint8_t) = 0;
+    virtual void received_COMMAND_Set_ManuelThrust_off(uint8_t) = 0;
+    virtual void received_COMMAND_Set_ManuelThrust_on(uint8_t) = 0;
+    virtual void received_COMMAND_Set_Thrust(uint8_t) = 0;
+    virtual void received_COMMAND_Set_Seperator(uint8_t) = 0;
+
+
 
 //    uint32_t sender(QByteArray data, uint8_t resend = false); // returns telemetry number
     uint32_t reSender(QByteArray data, uint8_t resend = true, uint8_t firstTime = true);
@@ -56,7 +60,7 @@ public slots:
     //PACKAGE TYPES
 
     void received_DATA(QByteArray DATA);
-    void received_COMMAND(uint8_t COMMAND);
+    void received_COMMAND(uint8_t COMMAND, uint8_t data);
 };
 
 #endif // ABSTRACTTELEMETRYOBJECT_H
