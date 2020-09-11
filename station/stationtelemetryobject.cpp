@@ -2,6 +2,7 @@
 #include <QFile>
 #include <string.h>
 #include <QFileInfo>
+#include <QDateTime>
 StationTelemetryObject::StationTelemetryObject()
 {
     receiver = 0x0037;
@@ -10,17 +11,25 @@ StationTelemetryObject::StationTelemetryObject()
 void StationTelemetryObject::run(){
 
 
-    StationTelemetryObject tmObj;
+//    StationTelemetryObject tmObj;
     QTimer::singleShot(500, [&](){
         videoReadyChecker();
     });
 
     QTimer::singleShot(0, [&](){
         xBee = new mainObj();
-        QObject::connect(&tmObj, &StationTelemetryObject::send, xBee, &mainObj::send);
-        QObject::connect(xBee, &mainObj::receive, &tmObj, &StationTelemetryObject::received_DATA);
+        QObject::connect(this, &StationTelemetryObject::send, xBee, &mainObj::send);
+        QObject::connect(xBee, &mainObj::receive, this, &StationTelemetryObject::received_DATA);
     });
 
+    telemetryFile.setFileName(QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString(".csv"));
+    telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    telemetyOutput.setDevice((&telemetryFile));
+    telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
+                     "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
+                     "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
+
+    telemetryFile.flush();
     this->exec();
 }
 
@@ -28,8 +37,8 @@ void StationTelemetryObject::run(){
 
 void StationTelemetryObject::sendSeperateCarrier(){
     Command cmd;
-    cmd.header.type = PACKAGE_Command;
-    cmd.command = COMMAND_Seperate_Carrier;
+    cmd.header.type =  Package_Enum::COMMAND;
+    cmd.command = Command_Enum::SEPERATE_CARRIER;
 //    Q_ASSERT(false);
     reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
     qDebug() <<"carrier Send";
@@ -39,16 +48,31 @@ void StationTelemetryObject::sendSeperateCarrier(){
 
 void StationTelemetryObject::sendSetSeperator(uint8_t data){
     Command cmd;
-    cmd.header.type = PACKAGE_Command;
-    cmd.command = COMMAND_Set_Seperator;
+    cmd.header.type = Package_Enum::COMMAND;
+    cmd.command = Command_Enum::SET_SEPERATOR;
     cmd.data = data;
     reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
     qDebug() << "DATA: " << data;
 }
 void StationTelemetryObject::sendSetEngineThrust(uint8_t data){
     Command cmd;
-    cmd.header.type = PACKAGE_Command;
-    cmd.command = COMMAND_Set_Thrust;
+    cmd.header.type = Package_Enum::COMMAND;
+    cmd.command = Command_Enum::SET_THRUST;
+    cmd.data = data;
+    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+}
+void StationTelemetryObject::sendTestThrust(uint8_t data){
+    Command cmd;
+    cmd.header.type = Package_Enum::COMMAND;
+    cmd.command = Command_Enum::TEST_THRUST;
+    cmd.data = data;
+    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+}
+
+void StationTelemetryObject::sendGroundSet(uint8_t data){
+    Command cmd;
+    cmd.header.type = Package_Enum::COMMAND;
+    cmd.command = Command_Enum::ALTITUDE_CALIBRATE;
     cmd.data = data;
     reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
 }
@@ -94,7 +118,7 @@ void StationTelemetryObject::videoSender(bool firstTime){
         partPointer = 0;
 
         Set_Video_Name svn;
-        svn.header.type = PACKAGE_Set_Video_Name;
+        svn.header.type = Package_Enum::SET_VIDEO_NAME;
         videoPath = QFileInfo(file).fileName();
         Q_ASSERT(videoPath.size() < 25);
         strcpy((char *)svn.name, videoPath.toStdString().c_str());
@@ -119,9 +143,9 @@ void StationTelemetryObject::videoSender(bool firstTime){
     //            qDebug() << "ACKED: " << videoSenderIndex + lastPoint;
             }
             else{
-    //            qDebug() << "SEND : " << videoSenderIndex + lastPoint;
+                qDebug() << "SEND : " << videoSenderIndex + lastPoint;
                 Video_Data vd;
-                vd.header.type = PACKAGE_Video_Data;
+                vd.header.type = Package_Enum::VIDEO_DATA;
                 vd.video_data_len = packet.size();
                 vd.video_packet_number = videoSenderIndex + lastPoint;
 
@@ -159,7 +183,7 @@ void StationTelemetryObject::videoSender(bool firstTime){
     }
 
     if(lastPoint != videoPartCount){
-        QTimer::singleShot(0, [&](){
+        QTimer::singleShot(10, [&](){
             videoSender(false);
         });
     }else{
@@ -177,7 +201,7 @@ void StationTelemetryObject::loop(){
 void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data){
     qDebug() <<"+++++++++++++++++++++++++++++++++";
     qDebug() << "Package Number: " << data.package_number;
-    qDebug() << "Latitude: " << data.gps_latitude << " Longtitude: " << data.gps_longtitude << " Altitude: " << data.gps_altiude;
+    qDebug() << "Latitude: " << QString::number( data.gps_latitude, 'g', 10) << " Longtitude: " << data.gps_longtitude << " Altitude: " << data.gps_altiude;
     qDebug() << "Date: " << data.day << "/" << data.month << "/" << data.year <<
                 " time: " << data.hour << ":" << data.minute << ":" << data.second;
     qDebug() << "Pitch: " << data.pitch << " Roll: " <<data.roll << " Yaw: " << data.yaw;
@@ -187,9 +211,33 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
     qDebug() << "Temperature: " << data.temperature;
     qDebug() << "Gps FIX: " << data.GPS_fix;
     qDebug() << "Height: " << data.height;
+    qDebug() << "Speed: " << data.speed;
     qDebug() <<"+++++++++++++++++++++++++++++++++";
 
-    wind->newTelemetryData(data);
+    telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
+                     "%7,%8,%9,%10,%11,"
+                     "%12,%13,%14,%15,%16,%17\n")
+              .arg(data.team_no)
+              .arg(data.package_number)
+              .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
+              .arg(data.pressure)
+              .arg(data.height)
+              .arg(data.speed)
+              .arg(data.temperature)
+              .arg(data.voltage)
+              .arg(data.gps_latitude)
+              .arg(data.gps_longtitude)
+              .arg(data.gps_altiude)
+              .arg("-----") //Status
+              .arg(data.pitch)
+              .arg(data.roll)
+              .arg(data.yaw)
+              .arg(data.rotation_count)
+              .arg(data.video_check ? "Evet" : "Hayır");
+
+    telemetryFile.flush();
+//    wind->newTelemetryData(data);
+    emit newTelemetryData(data);
 //    qDebug() <<
     //TODO
 }
@@ -238,5 +286,9 @@ void StationTelemetryObject::received_COMMAND_Set_Thrust(uint8_t data){
 
 }
 void StationTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
+
+}
+
+void StationTelemetryObject::received_COMMAND_Test_Thrust(uint8_t){
 
 }

@@ -15,6 +15,7 @@
 #include <QElapsedTimer>
 #include "lsm9ds0/SFE_LSM9DS0.h"
 #include "nano_packets.h"
+#include "../protocol/mainobj.h"
 
 class SatelliteTelemetryObject : public AbstractTelemetryObject
 {
@@ -36,14 +37,17 @@ public:
     void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
     void received_COMMAND_Set_Thrust(uint8_t) override;
     void received_COMMAND_Set_Seperator(uint8_t) override;
+    void received_COMMAND_Test_Thrust(uint8_t) override;
 
     QByteArray Telemetry_sendThis;
     Telemetry_Data Telemetry_update;
 
     QTimer oneSecond;
 
-    float groundPressure;
-    float groundAltitude;
+    mainObj xbeeObj;
+
+//    float groundPressure = 0;
+    float groundHeight = 0;
 
 
 
@@ -71,7 +75,27 @@ public:
     uint8_t telemetryRefresh = 0;
 //    uint8_t tele;
 
-    float pressure0 = 1001.84;
+    float pressure0 = 1013;
+
+
+
+    QVector<float> pressureValues;
+    void addPressure(float);
+    float getAveragePressure();
+
+
+    QVector<float> voltageValues;
+    void addVoltage(float);
+    float getAverageVoltage();
+
+    QElapsedTimer nanoTimer;
+
+    uint8_t satelliteStatus = Status_Enum::NONE;
+    uint8_t calcSatelliteStatus();
+
+    float maxReachedHeight = 0;
+
+
 
 public slots:
     void loop();

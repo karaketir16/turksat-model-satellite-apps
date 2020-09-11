@@ -66,11 +66,32 @@ qDebug() << "Big";
 //QProcess::execute("omega2-ctrl gpiomux set pwm1 pwm");
 //QProcess::execute("omega2-ctrl gpiomux set pwm0 pwm");
 ////QProcess::execute("omega2-ctrl gpiomux set pwm0 pwm");
+
+ArduinoNanoObject ardn;
+
+QProcess::execute("gpio -g mode 17 out");
+QProcess::execute("gpio -g mode 17 down");
+QProcess::execute("gpio -g write 17 0");
+QProcess::execute("gpio -g write 17 1");
+usleep(1000 * 50);
+QProcess::execute("gpio -g write 17 0");
+usleep(1000 * 1000);
+
 QProcess::execute("gpio -g mode 12 pwm");
 QProcess::execute("gpio pwm-ms");
 QProcess::execute("gpio pwmc 192");
 QProcess::execute("gpio pwmr 2000");
-QProcess::execute("gpio -g pwm 12 85");
+QProcess::execute("gpio -g pwm 12 " + QString::number(SEPERATOR_NOT_SEPERATED));
+
+usleep(1000 * 500);
+
+QProcess::execute("gpio -g write 17 1");
+usleep(1000 * 50);
+QProcess::execute("gpio -g write 17 0");
+usleep(1000 * 50);
+QProcess::execute("gpio -g write 17 1");
+usleep(1000 * 50);
+QProcess::execute("gpio -g write 17 0");
 
 usleep(1000 * 500);
 
@@ -78,9 +99,12 @@ QProcess::execute("gpio -g mode 13 pwm");
 QProcess::execute("gpio pwm-ms");
 QProcess::execute("gpio pwmc 192");
 QProcess::execute("gpio pwmr 2000");
+
+usleep(1000 * 2000);
+
 QProcess::execute("gpio -g pwm 13 90");
 
-usleep(1000 * 500);
+
 
 
 //    setup();
@@ -108,12 +132,12 @@ usleep(1000 * 500);
 //        qDebug() << "----------------------------" ;
 //    });
 
-    mainObj obj;
+
     SatelliteTelemetryObject tmObj;
-    ArduinoNanoObject ardn;
+
+    usleep(1000 * 1000);
     QObject::connect(&ardn, &ArduinoNanoObject::receive, &tmObj, &SatelliteTelemetryObject::received_Nano_Package);
-    QObject::connect(&tmObj, &SatelliteTelemetryObject::send, &obj, &mainObj::send);
-    QObject::connect(&obj, &mainObj::receive, &tmObj, &SatelliteTelemetryObject::received_DATA);
+
     tmObj.start();
 
 

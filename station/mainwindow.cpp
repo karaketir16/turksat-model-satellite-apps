@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
     pressureStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Basınç(hPa)");
 
 
+
 //    grid = new QwtPlotGrid();
 //    grid->attach( ui->heightPlot );
 
@@ -181,12 +182,12 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
     if(data.GPS_fix){
         longitudeStruct.points << QPointF(data.package_number, data.gps_longtitude);
         rePlot(longitudeStruct);
-        ui->textLong->setText(QString::number(data.gps_longtitude));
+        ui->textLong->setText(QString::number(data.gps_longtitude, 'g', 10));
 
 
         latitudeStruct.points << QPointF(data.package_number, data.gps_latitude);
         rePlot(latitudeStruct);
-        ui->textLat->setText(QString::number(data.gps_latitude));
+        ui->textLat->setText(QString::number(data.gps_latitude, 'g', 10));
 
         altitudeStruct.points << QPointF(data.package_number, data.gps_altiude);
         rePlot(altitudeStruct);
@@ -209,6 +210,8 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
     ui->progressBar->setValue(data.videoPercent);
 
     ui->signalLevel->setText("-" + QString::number(RSSI) + "dBm");
+
+    ui->textSatelliteStatus->setText(Status_Text[data.status]);
 
 
     QTransform trans;
@@ -249,10 +252,6 @@ void MainWindow::on_sendButton_clicked()
 //    emit sendVideo(ui->videoFilePath->text().toStdString().c_str());
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-
-}
 
 void MainWindow::on_seperateCommand_clicked()
 {
@@ -262,9 +261,28 @@ void MainWindow::on_seperateCommand_clicked()
 void MainWindow::on_engineSlider_valueChanged(int value)
 {
     emit setEngineThrust(value);
+    ui->spinBox->setValue(value);
+//    ui->lcdNumber->set
 }
 
 void MainWindow::on_seperatorSlider_valueChanged(int value)
 {
     emit setSeperator(value);
+}
+
+
+void MainWindow::on_testThrust_clicked()
+{
+    emit testThrust(0);
+}
+
+void MainWindow::on_actionZemin_Belirle_triggered()
+{
+    emit groundSet(0);
+}
+
+void MainWindow::on_checkBox_stateChanged(int arg1)
+{
+    ui->engineSlider->setEnabled(arg1);
+    ui->testThrust->setEnabled(arg1);
 }

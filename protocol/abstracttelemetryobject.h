@@ -7,6 +7,9 @@
 #include "telemetry_protocol.h"
 #include <QSet>
 #include <QMap>
+#include <QFile>
+#include <QTextStream>
+
 class AbstractTelemetryObject : public QThread
 {
     Q_OBJECT
@@ -33,6 +36,7 @@ public:
     virtual void received_COMMAND_Set_ManuelThrust_on(uint8_t) = 0;
     virtual void received_COMMAND_Set_Thrust(uint8_t) = 0;
     virtual void received_COMMAND_Set_Seperator(uint8_t) = 0;
+    virtual void received_COMMAND_Test_Thrust(uint8_t) = 0;
 
 
 
@@ -51,6 +55,10 @@ public:
     QSet<uint32_t> ackedPackages;
 
     uint16_t receiver = 0xABAB;
+
+
+    QFile telemetryFile;
+    QTextStream telemetyOutput;
 
 signals:
     void send(QByteArray data, uint16_t receiver);

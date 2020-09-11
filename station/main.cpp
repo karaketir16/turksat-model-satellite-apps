@@ -25,6 +25,7 @@
 #include "../protocol/protocol.h"
 
 #include <../protocol/mainobj.h>
+#include <QDateTime>
 
 QString serialPortName = "ttyUSB0";
 
@@ -36,8 +37,9 @@ int main(int argc, char *argv[])
     qRegisterMetaType<uint16_t>("uint16_t");
 
 
+//    Q_ASSERT(false);
     StationTelemetryObject tmObj;
-//    tmObj.start();
+    tmObj.start();
 
 
     MainWindow w;
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
     QObject::connect(&w, &MainWindow::seperateCarrier, &tmObj, &StationTelemetryObject::sendSeperateCarrier);
     QObject::connect(&w, &MainWindow::setSeperator, &tmObj, &StationTelemetryObject::sendSetSeperator);
     QObject::connect(&w, &MainWindow::setEngineThrust, &tmObj, &StationTelemetryObject::sendSetEngineThrust);
+    QObject::connect(&w, &MainWindow::testThrust, &tmObj, &StationTelemetryObject::sendTestThrust);
+    QObject::connect(&w, &MainWindow::groundSet, &tmObj, &StationTelemetryObject::sendGroundSet);
 
     return a.exec();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1920</width>
-    <height>1080</height>
+    <height>1015</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -398,6 +398,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -421,6 +427,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -446,6 +458,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -469,6 +487,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -494,6 +518,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -508,10 +538,10 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>10</y>
+      <x>490</x>
+      <y>0</y>
       <width>1411</width>
-      <height>330</height>
+      <height>331</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -679,10 +709,10 @@
    <widget class="QWidget" name="horizontalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>350</y>
+      <x>490</x>
+      <y>340</y>
       <width>1411</width>
-      <height>330</height>
+      <height>331</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -931,11 +961,14 @@
      <string>Taşıyıcıyı Ayır</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="testThrust">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>910</y>
+      <y>880</y>
       <width>451</width>
       <height>61</height>
      </rect>
@@ -952,10 +985,10 @@
    <widget class="QLabel" name="simulationTest">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>690</y>
+      <x>1500</x>
+      <y>670</y>
       <width>321</width>
-      <height>331</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="text">
@@ -974,8 +1007,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>700</y>
+      <x>490</x>
+      <y>680</y>
       <width>160</width>
       <height>31</height>
      </rect>
@@ -1000,8 +1033,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget_4">
     <property name="geometry">
      <rect>
-      <x>947</x>
-      <y>849</y>
+      <x>500</x>
+      <y>820</y>
       <width>481</width>
       <height>45</height>
      </rect>
@@ -1053,13 +1086,13 @@
    <widget class="QWidget" name="horizontalLayoutWidget_5">
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>770</y>
-      <width>481</width>
+      <x>500</x>
+      <y>890</y>
+      <width>491</width>
       <height>45</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_19">
+    <layout class="QHBoxLayout" name="engineContolLay">
      <item>
       <widget class="QLabel" name="label_11">
        <property name="text">
@@ -1081,6 +1114,9 @@
        </item>
        <item>
         <widget class="QSlider" name="engineSlider">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="maximum">
           <number>100</number>
          </property>
@@ -1103,6 +1139,29 @@
      </item>
     </layout>
    </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>900</y>
+      <width>131</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Motor Kontrolü</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>900</y>
+      <width>71</width>
+      <height>29</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1113,8 +1172,20 @@
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuMenu">
+    <property name="title">
+     <string>Menü</string>
+    </property>
+    <addaction name="actionZemin_Belirle"/>
+   </widget>
+   <addaction name="menuMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionZemin_Belirle">
+   <property name="text">
+    <string>Zemin Belirle</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

@@ -55,13 +55,18 @@ private slots:
 
     void on_sendButton_clicked();
 
-    void on_pushButton_clicked();
 
     void on_seperateCommand_clicked();
 
     void on_engineSlider_valueChanged(int value);
 
     void on_seperatorSlider_valueChanged(int value);
+
+    void on_testThrust_clicked();
+
+    void on_actionZemin_Belirle_triggered();
+
+    void on_checkBox_stateChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -79,6 +84,7 @@ signals:
         void seperateCarrier();
         void setSeperator(uint8_t);
         void setEngineThrust(uint8_t);
-
+        void testThrust(uint8_t);
+        void groundSet(uint8_t);
 };
 #endif // MAINWINDOW_H

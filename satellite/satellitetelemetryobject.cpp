@@ -1,17 +1,21 @@
 #include "satellitetelemetryobject.h"
 
-#define VIDEO_PATH "/"
+#define VIDEO_PATH "/root/"
 
+#include <math.h>
+#include <QDateTime>
 #include <math.h>
 
 SatelliteTelemetryObject::SatelliteTelemetryObject()
 {
     receiver = 0x003C;
+    QObject::connect(this, &SatelliteTelemetryObject::send, &xbeeObj, &mainObj::send);
+    QObject::connect(&xbeeObj, &mainObj::receive, this, &SatelliteTelemetryObject::received_DATA);
 }
 
 void SatelliteTelemetryObject::run(){
     Telemetry_update = {{0,0}, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    Telemetry_update.header.type = PACKAGE_Telemetry_Data;
+    Telemetry_update.header.type = Package_Enum::TELEMETRY_DATA;
     Telemetry_update.package_number = 0;
     Telemetry_update.team_no = team_no;
     telemetry_number_counter = 0;
@@ -44,7 +48,7 @@ void SatelliteTelemetryObject::run(){
         Telemetry_update.yaw = lsm9ds0_getHeading();
         Telemetry_update.roll = lsm9ds0_getRoll();
         Telemetry_update.pitch = lsm9ds0_getPitch();
-        qDebug() << "Heading, roll, pitch" << Telemetry_update.yaw << Telemetry_update.roll << Telemetry_update.pitch;
+//        qDebug() << "Heading, roll, pitch" << Telemetry_update.yaw << Telemetry_update.roll << Telemetry_update.pitch;
     });
 
 
@@ -58,10 +62,75 @@ void SatelliteTelemetryObject::run(){
         telemetrySender();
     });
 
+
+
+
+//    telemetryFile.setFileName(QString(VIDEO_PATH) + QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString(".csv"));
+//    telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+//    telemetyOutput.setDevice(&telemetryFile);
+//    telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
+//                     "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
+//                     "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
+
+//    telemetryFile.flush();
+
+
+
+
     this->exec();
 }
 
+void SatelliteTelemetryObject::addPressure(float hPa){
+    pressureValues.push_back(hPa);
+    if(pressureValues.size() > 10){
+        pressureValues.pop_front();
+    }
+}
+float SatelliteTelemetryObject::getAveragePressure(){
+    float tmp = 0;
+    for(auto &a: pressureValues){
+        tmp += a;
+    }
+    tmp /= pressureValues.size();
+    return tmp;
+}
+
+void SatelliteTelemetryObject::addVoltage(float V){
+    voltageValues.push_back(V);
+    if(voltageValues.size() > 20){
+        voltageValues.pop_front();
+    }
+}
+float SatelliteTelemetryObject::getAverageVoltage(){
+    float tmp = 0;
+    for(auto &a: voltageValues){
+        tmp += a;
+    }
+    tmp /= voltageValues.size();
+    return tmp;
+}
+
+//#define HEIGHT_MOCK
+
+float heightCalculator(float hPa, float p0){
+#ifdef HEIGHT_MOCK
+    static float MOCK_H = 0;
+    static float MOCK_I = 1;
+
+
+    if(MOCK_H == 700){
+        MOCK_I = -1;
+    }
+
+    return MOCK_H += MOCK_I;
+#else
+    return 44330.0 * (1.0 - pow(hPa / p0, 0.1903));
+#endif
+
+}
+
 void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
+    auto lastTime = nanoTimer.restart();
     /*
     qDebug() << "recevied Lat: " << np.gps_latitude;
     qDebug() << "recevied Long: " << np.gps_longtitude;
@@ -84,16 +153,116 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.gps_altiude = np.gps_altitude;
     Telemetry_update.gps_latitude = np.gps_latitude;
     Telemetry_update.gps_longtitude = np.gps_longtitude;
-    Telemetry_update.pressure = np.pressure;
-    Telemetry_update.voltage = np.voltage;
+
+    addPressure(np.pressure);
+    Telemetry_update.pressure = getAveragePressure();
+//    qDebug() << pressureValues;
+//    qDebug() << getAveragePressure();
+
+    addVoltage(np.voltage);
+    Telemetry_update.voltage = getAverageVoltage();
+
     Telemetry_update.temperature = np.temp;
     Telemetry_update.GPS_fix = np.gps_fix;
-    auto powed = pow((pressure0 / np.pressure),(1/5.257)) - 1;
-    Telemetry_update.height = (powed * (np.temp + 273.15)) / 0.00065;
-//    qDebug() << "powed: " << powed << " Calculated Height" << Telemetry_update.height;
+
+//    auto tempTemp = 25.0;
+
+//    auto powed = pow(( / ),(1/5.257)) - 1;
+
+
+    auto newHeight = heightCalculator(getAveragePressure(), pressure0);
+
+    newHeight -= groundHeight;
+
+    Telemetry_update.speed = ((newHeight - Telemetry_update.height) / (lastTime * 1.0)) * 1000;
+    Telemetry_update.height = newHeight;
+
+    maxReachedHeight = std::max(maxReachedHeight, newHeight);
+
+
+    Telemetry_update.status = calcSatelliteStatus();
 }
 
+uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
+//    static bool something = true;
+//    static bool cancel
 
+    switch (satelliteStatus) {
+        case Status_Enum::NONE:
+        break;
+
+        case Status_Enum::Start:
+            if(Telemetry_update.height > 30){
+                satelliteStatus = Status_Enum::Rising_Before_475;
+            }
+            if(Telemetry_update.height > 475){
+                satelliteStatus = Status_Enum::Rising_After_475;
+            }
+        break;
+
+        case Status_Enum::Rising_Before_475:
+            if(Telemetry_update.height > 475){
+                satelliteStatus = Status_Enum::Rising_After_475;
+            }
+        break;
+
+        case Status_Enum::Rising_After_475:
+            if(Telemetry_update.height < maxReachedHeight - 75){
+                satelliteStatus = Status_Enum::Falling_Before_Sep;
+            }
+        break;
+
+        case Status_Enum::Falling_Before_Sep:
+            if(Telemetry_update.height < 400){
+                satelliteStatus = Status_Enum::Seperating;
+                received_COMMAND_Seperate_Carrier(0);
+                QTimer::singleShot(500,[&](){
+
+                    //First Run Motors Here
+
+                    satelliteStatus = Status_Enum::Falling_After_Sep;
+                });
+            }
+        break;
+
+        case Status_Enum::Seperating:
+            //Nothing to do
+        break;
+
+        case Status_Enum::Falling_After_Sep:
+            if(Telemetry_update.height < 75){
+                satelliteStatus = Status_Enum::Slow_Fall;
+            }
+            else {
+                //Set Motor Speed
+            }
+        break;
+
+        case Status_Enum::Slow_Fall:
+            if(Telemetry_update.height < 5){
+
+                //Turn Off motors
+                //Run Buzzer Here
+
+
+                satelliteStatus = Status_Enum::Ground_After_Fall;
+            }
+            else {
+                //Set Motor Speed For slow fall
+            }
+        break;
+
+        case Status_Enum::Ground_After_Fall:
+            //Running Buzzer, never end ?
+        break;
+
+
+        case Status_Enum::End:
+        break;
+    }
+
+    return satelliteStatus;
+}
 void SatelliteTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data){
     //Not implemented
     Q_UNUSED(data);
@@ -106,7 +275,7 @@ void SatelliteTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data da
 void SatelliteTelemetryObject::received_PACKAGE_Set_Video_Name(Set_Video_Name set_video_name){
     expectedVideoParts = set_video_name.video_packet_count;
     videoData = QVector<QByteArray>(expectedVideoParts);
-    videoFile.setFileName(QString(VIDEO_PATH) + QString((char*)set_video_name.name)); //TODO video PATH
+    videoFile.setFileName(QString(VIDEO_PATH) + QString("_")+QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString((char*)set_video_name.name)); //TODO video PATH
     if( ! videoFile.open(QIODevice::ReadWrite | QIODevice::Truncate)){
         qDebug() << "Cannot Open";
     }
@@ -128,7 +297,7 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
 //    qDebug() << "B";
     if(videoData[video_data.video_packet_number].size() != 0){
         //duplicate Video package
-//        qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
+        qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
     }
     else {
         QByteArray tmp(video_data.video_data_len,0x00);
@@ -163,8 +332,13 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vi
 
 
 void SatelliteTelemetryObject::received_COMMAND_Altitude_Calibrate(uint8_t data){
-    groundAltitude = Telemetry_update.gps_altiude;
-    groundPressure = Telemetry_update.pressure;
+//    groundAltitude = Telemetry_update.gps_altiude;
+//    groundPressure = Telemetry_update.pressure;
+    groundHeight = heightCalculator(getAveragePressure(), pressure0);
+    Telemetry_update.height  = 0;
+    maxReachedHeight = 0;
+    satelliteStatus = Status_Enum::Start;
+
 }
 void SatelliteTelemetryObject::received_COMMAND_Seperate_Carrier(uint8_t data){
 //    QProcess::execute("onion pwm 1 13.7 100");
@@ -195,6 +369,23 @@ void SatelliteTelemetryObject::received_COMMAND_Set_Thrust(uint8_t data){
 
     QProcess::execute(str);
 }
+
+void SatelliteTelemetryObject::received_COMMAND_Test_Thrust(uint8_t data){
+
+//    Q_ASSERT(false);
+    QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) TEST_THRUST_0);
+    QProcess::execute(str);
+    QTimer::singleShot(500, [&](){
+        QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) TEST_THRUST_1);
+        QProcess::execute(str);
+
+        QTimer::singleShot(10000, [&](){
+            QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) MIN_THRUST);
+            QProcess::execute(str);
+        });
+    });
+}
+
 void SatelliteTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
     auto step = (SEPERATOR_SEPERATED - SEPERATOR_NOT_SEPERATED) / 100.0;
     auto res = SEPERATOR_NOT_SEPERATED + (step * data);
@@ -229,6 +420,34 @@ void SatelliteTelemetryObject::telemetrySetter(){
     Telemetry_sendThis = to_byte_array(&Telemetry_update, sizeof (Telemetry_update));
     setTelemetryNumber(Telemetry_sendThis);
     crc_fill((uint8_t *)Telemetry_sendThis.data(),Telemetry_sendThis.size());
+
+
+//    auto data = Telemetry_update;
+
+
+//    telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
+//                     "%7,%8,%9,%10,%11,"
+//                     "%12,%13,%14,%15,%16,%17\n")
+//              .arg(data.team_no)
+//              .arg(data.package_number)
+//              .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
+//              .arg(data.pressure)
+//              .arg(data.height)
+//              .arg(data.speed)
+//              .arg(data.temperature)
+//              .arg(data.voltage)
+//              .arg(data.gps_latitude)
+//              .arg(data.gps_longtitude)
+//              .arg(data.gps_altiude)
+//              .arg("-----") //Status
+//              .arg(data.pitch)
+//              .arg(data.roll)
+//              .arg(data.yaw)
+//              .arg(data.rotation_count)
+//              .arg(data.video_check ? "Evet" : "Hayır");
+
+//    telemetryFile.flush();
+
 }
 
 void SatelliteTelemetryObject::telemetrySender(){

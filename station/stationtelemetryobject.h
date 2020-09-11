@@ -44,6 +44,7 @@ public:
     void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
     void received_COMMAND_Set_Thrust(uint8_t) override;
     void received_COMMAND_Set_Seperator(uint8_t) override;
+    void received_COMMAND_Test_Thrust(uint8_t) override;
 
 
 public:
@@ -71,6 +72,8 @@ public:
 
     MainWindow * wind;
 
+
+
 public slots:
     void videoReadyChecker();
     void videoSender(bool fileName);
@@ -78,6 +81,8 @@ public slots:
     void sendSeperateCarrier();
     void sendSetSeperator(uint8_t);
     void sendSetEngineThrust(uint8_t);
+    void sendTestThrust(uint8_t);
+    void sendGroundSet(uint8_t);
 signals:
     void newTelemetryData(Telemetry_Data);
 };
