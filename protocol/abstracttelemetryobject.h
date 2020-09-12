@@ -32,6 +32,7 @@ public:
     virtual void received_COMMAND_Seperate_Carrier(uint8_t) = 0;
     virtual void received_COMMAND_Reset_Telemetry_Number(uint8_t) = 0;
     virtual void received_COMMAND_Reset_Package_Number(uint8_t) = 0;
+    virtual void received_COMMAND_Reset_Satellite_Status(uint8_t) = 0;
     virtual void received_COMMAND_Set_ManuelThrust_off(uint8_t) = 0;
     virtual void received_COMMAND_Set_ManuelThrust_on(uint8_t) = 0;
     virtual void received_COMMAND_Set_Thrust(uint8_t) = 0;
@@ -39,12 +40,15 @@ public:
     virtual void received_COMMAND_Test_Thrust(uint8_t) = 0;
 
 
+    virtual uint32_t generateTelemetryNumber() = 0;
+
+
 
 //    uint32_t sender(QByteArray data, uint8_t resend = false); // returns telemetry number
     uint32_t reSender(QByteArray data, uint8_t resend = true, uint8_t firstTime = true);
     uint32_t setTelemetryNumber(QByteArray &data);
 
-    uint32_t telemetry_number_counter = 1;
+    uint32_t telemetry_number_counter = 0;
 
 //    ACK createAck(uint32_t telemetry_number);
 

@@ -20,7 +20,7 @@ AbstractTelemetryObject::AbstractTelemetryObject(QObject *parent) : QThread(pare
 
 uint32_t AbstractTelemetryObject::setTelemetryNumber(QByteArray &data){
     Telemetry_Header * hd = (Telemetry_Header *)data.data();
-    hd->telemetry_number = telemetry_number_counter++;
+    hd->telemetry_number = generateTelemetryNumber();
     return  hd->telemetry_number;
 }
 
@@ -133,6 +133,9 @@ void AbstractTelemetryObject::received_COMMAND(uint8_t COMMAND, uint8_t data){
         break;
         case Command_Enum::RESET_TELEMETRY_NUMBER:
             received_COMMAND_Reset_Telemetry_Number(data);
+        break;
+        case Command_Enum::RESET_SATELLITE_STATUS:
+            received_COMMAND_Reset_Satellite_Status(data);
         break;
         case Command_Enum::SET_MANUELTHRUST_OFF:
             received_COMMAND_Set_ManuelThrust_off(data);

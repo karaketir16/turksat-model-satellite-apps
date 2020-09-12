@@ -255,34 +255,45 @@ void MainWindow::on_sendButton_clicked()
 
 void MainWindow::on_seperateCommand_clicked()
 {
-    emit seperateCarrier();
+    emit commandSend(Command_Enum::SEPERATE_CARRIER, 0);
 }
 
 void MainWindow::on_engineSlider_valueChanged(int value)
 {
-    emit setEngineThrust(value);
+//    emit setEngineThrust(value);
+    emit commandSend(Command_Enum::SET_THRUST, value);
     ui->spinBox->setValue(value);
 //    ui->lcdNumber->set
 }
 
 void MainWindow::on_seperatorSlider_valueChanged(int value)
 {
-    emit setSeperator(value);
+//    emit setSeperator(value);
+    emit commandSend(Command_Enum::SET_SEPERATOR, value);
 }
 
 
 void MainWindow::on_testThrust_clicked()
 {
-    emit testThrust(0);
+//    emit testThrust(0);
+    emit commandSend(Command_Enum::TEST_THRUST, 0);
 }
 
 void MainWindow::on_actionZemin_Belirle_triggered()
 {
-    emit groundSet(0);
+//    emit groundSet(0);
+    emit commandSend(Command_Enum::ALTITUDE_CALIBRATE, 0);
 }
+
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
     ui->engineSlider->setEnabled(arg1);
     ui->testThrust->setEnabled(arg1);
+}
+
+void MainWindow::on_actionStat_S_f_rla_triggered()
+{
+//    emit resetStatus(0);
+    emit commandSend(Command_Enum::RESET_SATELLITE_STATUS, 0);
 }

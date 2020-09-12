@@ -37,6 +37,7 @@ enum Command_Enum {
     SEPERATE_CARRIER            ,
     RESET_TELEMETRY_NUMBER      ,
     RESET_PACKAGE_NUMBER        ,
+    RESET_SATELLITE_STATUS      ,
     SET_MANUELTHRUST_OFF        ,
     SET_MANUELTHRUST_ON         ,
     SET_THRUST                  ,
@@ -78,6 +79,15 @@ extern QVector<QString> Status_Text ;
 #define SEPERATOR_NOT_SEPERATED               115
 
 
+
+typedef struct __attribute__((packed)) SaveValues{
+    uint32_t telemetry_number;
+    uint16_t package_number;
+    uint8_t status;
+    float groundHeight;
+}SaveValues;
+
+bool operator==(const SaveValues a, const SaveValues b);
 
 
 typedef struct __attribute__((packed)) Telemetry_Header {

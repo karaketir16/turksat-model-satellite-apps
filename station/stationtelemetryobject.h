@@ -40,11 +40,14 @@ public:
     void received_COMMAND_Seperate_Carrier(uint8_t) override;
     void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
     void received_COMMAND_Reset_Package_Number(uint8_t) override;
+    void received_COMMAND_Reset_Satellite_Status(uint8_t) override;
     void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
     void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
     void received_COMMAND_Set_Thrust(uint8_t) override;
     void received_COMMAND_Set_Seperator(uint8_t) override;
     void received_COMMAND_Test_Thrust(uint8_t) override;
+
+    uint32_t generateTelemetryNumber() override;
 
 
 public:
@@ -78,11 +81,14 @@ public slots:
     void videoReadyChecker();
     void videoSender(bool fileName);
     void loop();
-    void sendSeperateCarrier();
-    void sendSetSeperator(uint8_t);
-    void sendSetEngineThrust(uint8_t);
-    void sendTestThrust(uint8_t);
-    void sendGroundSet(uint8_t);
+//    void sendSeperateCarrier();
+//    void sendSetSeperator(uint8_t);
+//    void sendSetEngineThrust(uint8_t);
+//    void sendTestThrust(uint8_t);
+//    void sendGroundSet(uint8_t);
+//    void sendResetStatus(uint8_t);
+
+    void commandSend(uint8_t, uint8_t);
 signals:
     void newTelemetryData(Telemetry_Data);
 };

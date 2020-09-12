@@ -33,11 +33,16 @@ public:
     void received_COMMAND_Seperate_Carrier(uint8_t) override;
     void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
     void received_COMMAND_Reset_Package_Number(uint8_t) override;
+    void received_COMMAND_Reset_Satellite_Status(uint8_t) override;
     void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
     void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
     void received_COMMAND_Set_Thrust(uint8_t) override;
     void received_COMMAND_Set_Seperator(uint8_t) override;
     void received_COMMAND_Test_Thrust(uint8_t) override;
+
+
+    uint32_t generateTelemetryNumber() override;
+
 
     QByteArray Telemetry_sendThis;
     Telemetry_Data Telemetry_update;
@@ -49,7 +54,7 @@ public:
 //    float groundPressure = 0;
     float groundHeight = 0;
 
-
+    QTimer telemSet;
 
 
     uint16_t team_no = 53402;
@@ -71,11 +76,17 @@ public:
 
     uint8_t lsmStatus = 0;
 
+    uint8_t settedThrust = 0;
+
 
     uint8_t telemetryRefresh = 0;
 //    uint8_t tele;
 
     float pressure0 = 1013;
+
+
+
+    float heightCalculator(float hPa, float p0);
 
 
 
@@ -90,12 +101,22 @@ public:
 
     QElapsedTimer nanoTimer;
 
-    uint8_t satelliteStatus = Status_Enum::NONE;
+
     uint8_t calcSatelliteStatus();
 
     float maxReachedHeight = 0;
 
+    void beepBuzzer(int ms);
 
+
+    SaveValues saveValues;
+    SaveValues saveValuesWritten = {0,0,0};
+
+    void writeSaveValues();
+    QFile saveValuesFile[2];
+
+
+    void pressDvrSaveButton();
 
 public slots:
     void loop();

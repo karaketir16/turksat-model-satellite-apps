@@ -29,50 +29,65 @@ void StationTelemetryObject::run(){
                      "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
                      "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
 
-    telemetryFile.flush();
+    telemetyOutput.flush();
     this->exec();
 }
 
 #define PARTSIZE 50 //TODO
 
-void StationTelemetryObject::sendSeperateCarrier(){
-    Command cmd;
-    cmd.header.type =  Package_Enum::COMMAND;
-    cmd.command = Command_Enum::SEPERATE_CARRIER;
-//    Q_ASSERT(false);
-    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-    qDebug() <<"carrier Send";
-//    Q_ASSERT(false);
-}
+//void StationTelemetryObject::sendSeperateCarrier(){
+//    Command cmd;
+//    cmd.header.type =  Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::SEPERATE_CARRIER;
+////    Q_ASSERT(false);
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//    qDebug() <<"carrier Send";
+////    Q_ASSERT(false);
+//}
 
 
-void StationTelemetryObject::sendSetSeperator(uint8_t data){
-    Command cmd;
-    cmd.header.type = Package_Enum::COMMAND;
-    cmd.command = Command_Enum::SET_SEPERATOR;
-    cmd.data = data;
-    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-    qDebug() << "DATA: " << data;
-}
-void StationTelemetryObject::sendSetEngineThrust(uint8_t data){
-    Command cmd;
-    cmd.header.type = Package_Enum::COMMAND;
-    cmd.command = Command_Enum::SET_THRUST;
-    cmd.data = data;
-    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-}
-void StationTelemetryObject::sendTestThrust(uint8_t data){
-    Command cmd;
-    cmd.header.type = Package_Enum::COMMAND;
-    cmd.command = Command_Enum::TEST_THRUST;
-    cmd.data = data;
-    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-}
+//void StationTelemetryObject::sendSetSeperator(uint8_t data){
+//    Command cmd;
+//    cmd.header.type = Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::SET_SEPERATOR;
+//    cmd.data = data;
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//}
+//void StationTelemetryObject::sendSetEngineThrust(uint8_t data){
+//    Command cmd;
+//    cmd.header.type = Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::SET_THRUST;
+//    cmd.data = data;
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//}
+//void StationTelemetryObject::sendTestThrust(uint8_t data){
+//    Command cmd;
+//    cmd.header.type = Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::TEST_THRUST;
+//    cmd.data = data;
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//}
 
-void StationTelemetryObject::sendGroundSet(uint8_t data){
+//void StationTelemetryObject::sendGroundSet(uint8_t data){
+//    Command cmd;
+//    cmd.header.type = Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::ALTITUDE_CALIBRATE;
+//    cmd.data = data;
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//}
+
+//void StationTelemetryObject::sendResetStatus(uint8_t data){
+//    Command cmd;
+//    cmd.header.type = Package_Enum::COMMAND;
+//    cmd.command = Command_Enum::RESET_SATELLITE_STATUS;
+//    cmd.data = data;
+//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
+//}
+
+void StationTelemetryObject::commandSend(u_int8_t command, uint8_t data){
     Command cmd;
     cmd.header.type = Package_Enum::COMMAND;
-    cmd.command = Command_Enum::ALTITUDE_CALIBRATE;
+    cmd.command = command;
     cmd.data = data;
     reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
 }
@@ -228,14 +243,14 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
               .arg(data.gps_latitude)
               .arg(data.gps_longtitude)
               .arg(data.gps_altiude)
-              .arg("-----") //Status
+              .arg(Status_Text[data.status]) //Status
               .arg(data.pitch)
               .arg(data.roll)
               .arg(data.yaw)
               .arg(data.rotation_count)
               .arg(data.video_check ? "Evet" : "Hayır");
 
-    telemetryFile.flush();
+    telemetyOutput.flush();
 //    wind->newTelemetryData(data);
     emit newTelemetryData(data);
 //    qDebug() <<
@@ -276,6 +291,9 @@ void StationTelemetryObject::received_COMMAND_Reset_Telemetry_Number(uint8_t dat
 void StationTelemetryObject::received_COMMAND_Reset_Package_Number(uint8_t data){
     //Not Implemented
 }
+void StationTelemetryObject::received_COMMAND_Reset_Satellite_Status(uint8_t data){
+    //Not Implemented
+}
 void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_off(uint8_t data){
     //Not Implemented
 }
@@ -291,4 +309,8 @@ void StationTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
 
 void StationTelemetryObject::received_COMMAND_Test_Thrust(uint8_t){
 
+}
+
+uint32_t StationTelemetryObject::generateTelemetryNumber(){
+    return telemetry_number_counter++;
 }

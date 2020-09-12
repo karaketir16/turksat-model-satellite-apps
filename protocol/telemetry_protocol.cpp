@@ -9,9 +9,14 @@ QVector<QString> Status_Text = {
     "Alçalma, Ayrılma",
     "Alçalma, Ayrılma Sonrası",
     "Alçalma, Yavaşlama",
-    "Yere Seviyesinde",
+    "Yer Seviyesinde",
     "",
     ""};
+
+
+bool operator==(const SaveValues a, const SaveValues b){
+    return a.status == b.status && a.package_number == b.package_number && a.telemetry_number == b.telemetry_number;
+}
 
 
 // crc functions retrieved from a project of `Huseyin Kozan`

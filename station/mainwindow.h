@@ -68,6 +68,8 @@ private slots:
 
     void on_checkBox_stateChanged(int arg1);
 
+    void on_actionStat_S_f_rla_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTimer tm;
@@ -81,10 +83,12 @@ public slots:
         void newTelemetryData(Telemetry_Data data);
 signals:
         void sendVideo(const char *);
-        void seperateCarrier();
-        void setSeperator(uint8_t);
-        void setEngineThrust(uint8_t);
-        void testThrust(uint8_t);
-        void groundSet(uint8_t);
+//        void seperateCarrier();
+//        void setSeperator(uint8_t);
+//        void setEngineThrust(uint8_t);
+//        void testThrust(uint8_t);
+//        void groundSet(uint8_t);
+//        void resetStatus(uint8_t);
+        void commandSend(uint8_t, uint8_t);
 };
 #endif // MAINWINDOW_H

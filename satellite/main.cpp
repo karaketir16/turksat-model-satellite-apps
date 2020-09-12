@@ -69,12 +69,19 @@ qDebug() << "Big";
 
 ArduinoNanoObject ardn;
 
+SatelliteTelemetryObject tmObj;
+
+QProcess::execute("gpio -g mode 18 out");
+QProcess::execute("gpio -g write 17 1");
+
 QProcess::execute("gpio -g mode 17 out");
 QProcess::execute("gpio -g mode 17 down");
+
+
 QProcess::execute("gpio -g write 17 0");
-QProcess::execute("gpio -g write 17 1");
-usleep(1000 * 50);
-QProcess::execute("gpio -g write 17 0");
+
+
+tmObj.beepBuzzer(50);
 usleep(1000 * 1000);
 
 QProcess::execute("gpio -g mode 12 pwm");
@@ -85,13 +92,10 @@ QProcess::execute("gpio -g pwm 12 " + QString::number(SEPERATOR_NOT_SEPERATED));
 
 usleep(1000 * 500);
 
-QProcess::execute("gpio -g write 17 1");
+
+tmObj.beepBuzzer(50);
 usleep(1000 * 50);
-QProcess::execute("gpio -g write 17 0");
-usleep(1000 * 50);
-QProcess::execute("gpio -g write 17 1");
-usleep(1000 * 50);
-QProcess::execute("gpio -g write 17 0");
+tmObj.beepBuzzer(50);
 
 usleep(1000 * 500);
 
@@ -100,9 +104,6 @@ QProcess::execute("gpio pwm-ms");
 QProcess::execute("gpio pwmc 192");
 QProcess::execute("gpio pwmr 2000");
 
-usleep(1000 * 2000);
-
-QProcess::execute("gpio -g pwm 13 90");
 
 
 
@@ -133,7 +134,7 @@ QProcess::execute("gpio -g pwm 13 90");
 //    });
 
 
-    SatelliteTelemetryObject tmObj;
+
 
     usleep(1000 * 1000);
     QObject::connect(&ardn, &ArduinoNanoObject::receive, &tmObj, &SatelliteTelemetryObject::received_Nano_Package);

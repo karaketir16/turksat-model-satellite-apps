@@ -1177,6 +1177,7 @@
      <string>Menü</string>
     </property>
     <addaction name="actionZemin_Belirle"/>
+    <addaction name="actionStat_S_f_rla"/>
    </widget>
    <addaction name="menuMenu"/>
   </widget>
@@ -1184,6 +1185,11 @@
   <action name="actionZemin_Belirle">
    <property name="text">
     <string>Zemin Belirle</string>
+   </property>
+  </action>
+  <action name="actionStat_S_f_rla">
+   <property name="text">
+    <string>Statü Sıfırla</string>
    </property>
   </action>
  </widget>
