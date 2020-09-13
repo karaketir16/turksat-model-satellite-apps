@@ -29,17 +29,18 @@ public:
     void received_PACKAGE_Video_Data(Video_Data video_data) override;
     void received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK) override;
 
-    void received_COMMAND_Altitude_Calibrate(uint8_t) override;
-    void received_COMMAND_Seperate_Carrier(uint8_t) override;
-    void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
-    void received_COMMAND_Reset_Package_Number(uint8_t) override;
-    void received_COMMAND_Reset_Satellite_Status(uint8_t) override;
-    void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
-    void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
-    void received_COMMAND_Set_Thrust(uint8_t) override;
-    void received_COMMAND_Set_Seperator(uint8_t) override;
-    void received_COMMAND_Test_Thrust(uint8_t) override;
+    void Altitude_Calibrate(uint8_t);
+    void Seperate_Carrier(uint8_t);
+    void Reset_Telemetry_Number(uint8_t);
+    void Reset_Package_Number(uint8_t);
+    void Reset_Satellite_Status(uint8_t);
+    void Set_ManuelThrust_off(uint8_t);
+    void Set_ManuelThrust_on(uint8_t);
+    void Set_Thrust(uint8_t);
+    void Set_Seperator(uint8_t);
+    void Test_Thrust(uint8_t);
 
+    void received_COMMAND(Command) override;
 
     uint32_t generateTelemetryNumber() override;
 
@@ -55,6 +56,7 @@ public:
     float groundHeight = 0;
 
     QTimer telemSet;
+    QTimer tmLMH;
 
 
     uint16_t team_no = 53402;
@@ -70,9 +72,9 @@ public:
     QElapsedTimer testTimer;
 
 
-    QElapsedTimer IMUspeedTimer;
+//    QElapsedTimer IMUspeedTimer;
 
-    tripleFloat IMUspeed = {0,0,0};
+//    tripleFloat IMUspeed = {0,0,0};
 
     uint8_t lsmStatus = 0;
 
@@ -109,14 +111,17 @@ public:
     void beepBuzzer(int ms);
 
 
-    SaveValues saveValues;
-    SaveValues saveValuesWritten = {0,0,0};
 
-    void writeSaveValues();
-    QFile saveValuesFile[2];
+
+    void writeSaveValues() override;
+
+
+    float rotationCounter = 0;
 
 
     void pressDvrSaveButton();
+
+
 
 public slots:
     void loop();
@@ -126,6 +131,8 @@ public slots:
     void telemetrySender();
 
     void received_Nano_Package(nano_package np);
+
+    void readGyro();
 };
 
 #endif // SATELLITETELEMETRYOBJECT_H

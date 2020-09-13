@@ -152,9 +152,16 @@ MainWindow::MainWindow(QWidget *parent)
 //     ui->simulationTest->setPixmap(pm.transformed(trans));
 }
 
+float removePrec(float prec, float value){
+    float scale = prec;  // i.e. round to nearest one-hundreth
+    return (int)(value / scale) * scale;
+}
+
 void MainWindow::newTelemetryData(Telemetry_Data data){
 
 //    Q_ASSERT(false);
+
+
 
     auto rePlot = [&](PlotStruct &strc){
         strc.curve->setSamples(strc.points);
@@ -177,19 +184,19 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
 
     tempStruct.points << QPointF(data.package_number, data.temperature);
     rePlot(tempStruct);
-    ui->textTemp->setText(QString::number(data.temperature));
+    ui->textTemp->setText(QString::number(data.temperature, 'g', 2));
 
     if(data.GPS_fix){
-        longitudeStruct.points << QPointF(data.package_number, data.gps_longtitude);
+        longitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_longtitude));
         rePlot(longitudeStruct);
         ui->textLong->setText(QString::number(data.gps_longtitude, 'g', 10));
 
 
-        latitudeStruct.points << QPointF(data.package_number, data.gps_latitude);
+        latitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_latitude));
         rePlot(latitudeStruct);
         ui->textLat->setText(QString::number(data.gps_latitude, 'g', 10));
 
-        altitudeStruct.points << QPointF(data.package_number, data.gps_altiude);
+        altitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_altiude));
         rePlot(altitudeStruct);
 //        ui->text->setText(QString::number(data.gps_latitude));
     }
@@ -207,11 +214,13 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
     rePlot(pressureStruct);
     ui->textPressure->setText(QString::number(data.pressure));
 
-    ui->progressBar->setValue(data.videoPercent);
+    ui->progressBar->setValue( 100 * data.lastNotReceivedVideo / stationTelemetryObject->videoPartCount);
 
     ui->signalLevel->setText("-" + QString::number(RSSI) + "dBm");
 
     ui->textSatelliteStatus->setText(Status_Text[data.status]);
+
+    ui->textRotation->setText(QString::number(data.rotation_count));
 
 
     QTransform trans;
@@ -242,7 +251,9 @@ void MainWindow::on_fileSelect_clicked()
         tr("Dosya seçin"), "/home/karaketir16", tr("Video (*.mp4 *.avi)"));
 
     ui->videoFilePath->setText(fileName);
-    ui->sendButton->setEnabled(true);
+
+    if(fileName != QString(""))
+        ui->sendButton->setEnabled(true);
 }
 
 void MainWindow::on_sendButton_clicked()
@@ -261,8 +272,8 @@ void MainWindow::on_seperateCommand_clicked()
 void MainWindow::on_engineSlider_valueChanged(int value)
 {
 //    emit setEngineThrust(value);
+    ui->engineThrustText->setText(QString::number(value));
     emit commandSend(Command_Enum::SET_THRUST, value);
-    ui->spinBox->setValue(value);
 //    ui->lcdNumber->set
 }
 
@@ -290,10 +301,35 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 {
     ui->engineSlider->setEnabled(arg1);
     ui->testThrust->setEnabled(arg1);
+    if(arg1)
+        ui->engineThrustText->setText(QString::number(ui->engineSlider->value()));
+    else
+        ui->engineThrustText->setText("");
 }
 
 void MainWindow::on_actionStat_S_f_rla_triggered()
 {
 //    emit resetStatus(0);
     emit commandSend(Command_Enum::RESET_SATELLITE_STATUS, 0);
+}
+
+void MainWindow::on_actionGrafikleri_Temizle_triggered()
+{
+    heightStruct.points.clear();
+    tempStruct.points.clear();
+    longitudeStruct.points.clear();
+    latitudeStruct.points.clear();
+    altitudeStruct.points.clear();
+    speedStruct.points.clear();
+    voltageStruct.points.clear();
+    pressureStruct.points.clear();
+}
+
+void MainWindow::on_actionPaket_Numaras_triggered()
+{
+    //emit commandSend(Command_Enum::RESET_TELEMETRY_NUMBER, 0);
+    emit commandSend(Command_Enum::RESET_PACKAGE_NUMBER, 0);
+    QTimer::singleShot(1200, [&](){
+        on_actionGrafikleri_Temizle_triggered();
+    });
 }

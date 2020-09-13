@@ -78,7 +78,9 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
         reSender(to_byte_array(&tmp, sizeof(ACK)),false, true);
     } // send ACK
 
-    if(header->type == Package_Enum::VIDEO_DATA){
+
+    //NOT SEND VIDEO DATA ACK
+    if(       0                    &&  header->type == Package_Enum::VIDEO_DATA){
         Video_Data * vd = (Video_Data *) DATA.data();
         Video_Data_ACK tmp;//({{0,PACKAGE_Video_Data_ACK}, vd->video_packet_number,0,0});
         tmp.header.type = Package_Enum::VIDEO_DATA_ACK;
@@ -107,7 +109,7 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
                 received_PACKAGE_ACK(*((ACK*)DATA.data()));
             break;
             case Package_Enum::COMMAND:
-                received_COMMAND(((Command*)DATA.data())->command, ((Command*)DATA.data())->data);
+                received_COMMAND(*((Command*)DATA.data()));
             break;
             case Package_Enum::SET_VIDEO_NAME:
                 received_PACKAGE_Set_Video_Name(*((Set_Video_Name*)DATA.data()));
@@ -122,36 +124,4 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
     }
 }
 
-
-void AbstractTelemetryObject::received_COMMAND(uint8_t COMMAND, uint8_t data){
-    switch (COMMAND) {
-        case Command_Enum::ALTITUDE_CALIBRATE:
-            received_COMMAND_Altitude_Calibrate(data);
-        break;
-        case Command_Enum::SEPERATE_CARRIER:
-            received_COMMAND_Seperate_Carrier(data);
-        break;
-        case Command_Enum::RESET_TELEMETRY_NUMBER:
-            received_COMMAND_Reset_Telemetry_Number(data);
-        break;
-        case Command_Enum::RESET_SATELLITE_STATUS:
-            received_COMMAND_Reset_Satellite_Status(data);
-        break;
-        case Command_Enum::SET_MANUELTHRUST_OFF:
-            received_COMMAND_Set_ManuelThrust_off(data);
-        break;
-        case Command_Enum::SET_MANUELTHRUST_ON:
-            received_COMMAND_Set_ManuelThrust_on(data);
-        break;
-        case Command_Enum::SET_THRUST:
-            received_COMMAND_Set_Thrust(data);
-        break;
-        case Command_Enum::SET_SEPERATOR:
-            received_COMMAND_Set_Seperator(data);
-        break;
-        case Command_Enum::TEST_THRUST:
-            received_COMMAND_Test_Thrust(data);
-        break;
-    }
-}
 

@@ -41,6 +41,8 @@ inline void delay(int ms){
     usleep(ms * 1000);
 }
 
+#define DECLINATION 5.75
+
 LSM9DS0::LSM9DS0(interface_mode interface, uint8_t gAddr, uint8_t xmAddr)
 {
 	// interfaceMode will keep track of whether we're using SPI or I2C:
@@ -750,22 +752,40 @@ float lsm9ds0_getRoll()
 
 
 float lsm9ds0_getHeading(){
-    float heading;
-    float hx = dof.mx, hy = dof.my;
 
-    if (hy > 0)
-    {
-      heading = 90 - (atan(hx / hy) * (180 / M_PI));
-    }
-    else if (hy < 0)
-    {
-      heading = - (atan(hx / hy) * (180 / M_PI));
-    }
-    else // hy = 0
-    {
-      if (hx < 0) heading = 180;
-      else heading = 0;
-    }
+
+    float mx = -dof.mx, my = -dof.my;
+
+    float heading;
+      if (my == 0)
+        heading = (mx < 0) ? M_PI : 0;
+      else
+        heading = atan2(mx, my);
+
+      heading -= DECLINATION * M_PI / 180;
+
+      if (heading > M_PI) heading -= (2 * M_PI);
+      else if (heading < -M_PI) heading += (2 * M_PI);
+
+      // Convert everything from radians to degrees:
+      heading *= 180.0 / M_PI;
+
+//    float heading;
+//    float hx = dof.mx, hy = dof.my;
+
+//    if (hy > 0)
+//    {
+//      heading = 90 - (atan(hx / hy) * (180 / M_PI));
+//    }
+//    else if (hy < 0)
+//    {
+//      heading = - (atan(hx / hy) * (180 / M_PI));
+//    }
+//    else // hy = 0
+//    {
+//      if (hx < 0) heading = 180;
+//      else heading = 0;
+//    }
 
     return heading;
 }

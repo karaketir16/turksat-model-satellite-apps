@@ -27,17 +27,19 @@ public:
     virtual void received_PACKAGE_Video_Data(Video_Data video_data) = 0;
     virtual void received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK) = 0;
 
+    virtual void received_COMMAND(Command) = 0;
 
-    virtual void received_COMMAND_Altitude_Calibrate(uint8_t) = 0;
-    virtual void received_COMMAND_Seperate_Carrier(uint8_t) = 0;
-    virtual void received_COMMAND_Reset_Telemetry_Number(uint8_t) = 0;
-    virtual void received_COMMAND_Reset_Package_Number(uint8_t) = 0;
-    virtual void received_COMMAND_Reset_Satellite_Status(uint8_t) = 0;
-    virtual void received_COMMAND_Set_ManuelThrust_off(uint8_t) = 0;
-    virtual void received_COMMAND_Set_ManuelThrust_on(uint8_t) = 0;
-    virtual void received_COMMAND_Set_Thrust(uint8_t) = 0;
-    virtual void received_COMMAND_Set_Seperator(uint8_t) = 0;
-    virtual void received_COMMAND_Test_Thrust(uint8_t) = 0;
+
+//    virtual void received_COMMAND_Altitude_Calibrate(uint8_t) = 0;
+//    virtual void received_COMMAND_Seperate_Carrier(uint8_t) = 0;
+//    virtual void received_COMMAND_Reset_Telemetry_Number(uint8_t) = 0;
+//    virtual void received_COMMAND_Reset_Package_Number(uint8_t) = 0;
+//    virtual void received_COMMAND_Reset_Satellite_Status(uint8_t) = 0;
+//    virtual void received_COMMAND_Set_ManuelThrust_off(uint8_t) = 0;
+//    virtual void received_COMMAND_Set_ManuelThrust_on(uint8_t) = 0;
+//    virtual void received_COMMAND_Set_Thrust(uint8_t) = 0;
+//    virtual void received_COMMAND_Set_Seperator(uint8_t) = 0;
+//    virtual void received_COMMAND_Test_Thrust(uint8_t) = 0;
 
 
     virtual uint32_t generateTelemetryNumber() = 0;
@@ -64,6 +66,12 @@ public:
     QFile telemetryFile;
     QTextStream telemetyOutput;
 
+
+    SaveValues saveValues;
+    SaveValues saveValuesWritten = {0,0,0,0,0,0,0};
+    virtual void writeSaveValues() = 0;
+    QFile saveValuesFile[3];
+
 signals:
     void send(QByteArray data, uint16_t receiver);
 
@@ -72,7 +80,6 @@ public slots:
     //PACKAGE TYPES
 
     void received_DATA(QByteArray DATA);
-    void received_COMMAND(uint8_t COMMAND, uint8_t data);
 };
 
 #endif // ABSTRACTTELEMETRYOBJECT_H

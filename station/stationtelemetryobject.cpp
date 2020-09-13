@@ -3,10 +3,14 @@
 #include <string.h>
 #include <QFileInfo>
 #include <QDateTime>
+
+#define SAVE_FILE "KaldigimizYerdenDevamiSaglayanDosya.nevfeza"
+
 StationTelemetryObject::StationTelemetryObject()
 {
     receiver = 0x0037;
 }
+
 
 void StationTelemetryObject::run(){
 
@@ -30,59 +34,35 @@ void StationTelemetryObject::run(){
                      "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
 
     telemetyOutput.flush();
+
+
+    for(int i = 0; i < 3 ; i++){
+        saveValuesFile[i].setFileName(SAVE_FILE + QString::number(i));
+    }
+    for(int i = 0; i < 3 ; i++){
+
+        saveValuesFile[i].open(QIODevice::ReadWrite);
+        QByteArray ba = saveValuesFile[i].readAll();
+        if((uint)ba.size() == sizeof (SaveValues)){
+            SaveValues sv;
+            memcpy(&sv, ba.data(), sizeof (SaveValues));
+            if(crc_is_valid((uint8_t *) &sv, sizeof (sv))){
+
+                telemetry_number_counter = sv.telemetry_number;
+            }
+        }
+        else {
+            //First start, default values
+        }
+
+    }
+
+
     this->exec();
 }
 
 #define PARTSIZE 50 //TODO
 
-//void StationTelemetryObject::sendSeperateCarrier(){
-//    Command cmd;
-//    cmd.header.type =  Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::SEPERATE_CARRIER;
-////    Q_ASSERT(false);
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//    qDebug() <<"carrier Send";
-////    Q_ASSERT(false);
-//}
-
-
-//void StationTelemetryObject::sendSetSeperator(uint8_t data){
-//    Command cmd;
-//    cmd.header.type = Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::SET_SEPERATOR;
-//    cmd.data = data;
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//}
-//void StationTelemetryObject::sendSetEngineThrust(uint8_t data){
-//    Command cmd;
-//    cmd.header.type = Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::SET_THRUST;
-//    cmd.data = data;
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//}
-//void StationTelemetryObject::sendTestThrust(uint8_t data){
-//    Command cmd;
-//    cmd.header.type = Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::TEST_THRUST;
-//    cmd.data = data;
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//}
-
-//void StationTelemetryObject::sendGroundSet(uint8_t data){
-//    Command cmd;
-//    cmd.header.type = Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::ALTITUDE_CALIBRATE;
-//    cmd.data = data;
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//}
-
-//void StationTelemetryObject::sendResetStatus(uint8_t data){
-//    Command cmd;
-//    cmd.header.type = Package_Enum::COMMAND;
-//    cmd.command = Command_Enum::RESET_SATELLITE_STATUS;
-//    cmd.data = data;
-//    reSender(to_byte_array(&cmd, sizeof (cmd)), true, true);
-//}
 
 void StationTelemetryObject::commandSend(u_int8_t command, uint8_t data){
     Command cmd;
@@ -146,11 +126,12 @@ void StationTelemetryObject::videoSender(bool firstTime){
 
     if(videoNameSetted || ackedPackages.contains(videoSetTelemNumber)){
         videoNameSetted = true;
-        while(lastPoint < videoPartCount && ackedVideoParts.contains(lastPoint)){
-            lastPoint++;
-        }
+//        while(lastPoint < videoPartCount && ackedVideoParts.contains(lastPoint)){
+//            lastPoint++;
+//        }
+        lastPoint = lastPointVideo;
 
-        if(videoSenderIndex < 1000/*1000*/ && (videoSenderIndex + lastPoint) < videoPartCount){
+        if(videoSenderIndex < 100/*1000*/ && (videoSenderIndex + lastPoint) < videoPartCount){
     //        qDebug() << "index: " << videoSenderIndex;
             auto packet = videoPackets[videoSenderIndex + lastPoint];
             if(ackedVideoParts.contains(videoSenderIndex + lastPoint)){
@@ -214,6 +195,9 @@ void StationTelemetryObject::loop(){
 }
 
 void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data){
+
+    lastPointVideo = data.lastNotReceivedVideo;
+
     qDebug() <<"+++++++++++++++++++++++++++++++++";
     qDebug() << "Package Number: " << data.package_number;
     qDebug() << "Latitude: " << QString::number( data.gps_latitude, 'g', 10) << " Longtitude: " << data.gps_longtitude << " Altitude: " << data.gps_altiude;
@@ -227,6 +211,7 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
     qDebug() << "Gps FIX: " << data.GPS_fix;
     qDebug() << "Height: " << data.height;
     qDebug() << "Speed: " << data.speed;
+    qDebug() << "LastVideo" << data.lastNotReceivedVideo;
     qDebug() <<"+++++++++++++++++++++++++++++++++";
 
     telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
@@ -278,39 +263,38 @@ void StationTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vide
     }
 }
 
-
-void StationTelemetryObject::received_COMMAND_Altitude_Calibrate(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Seperate_Carrier(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Reset_Telemetry_Number(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Reset_Package_Number(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Reset_Satellite_Status(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_off(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Set_ManuelThrust_on(uint8_t data){
-    //Not Implemented
-}
-void StationTelemetryObject::received_COMMAND_Set_Thrust(uint8_t data){
-
-}
-void StationTelemetryObject::received_COMMAND_Set_Seperator(uint8_t data){
-
+void StationTelemetryObject::received_COMMAND(Command){
+    //NOT IMPLEMENTED
 }
 
-void StationTelemetryObject::received_COMMAND_Test_Thrust(uint8_t){
 
+void StationTelemetryObject::writeSaveValues(){
+//    saveValues.status = Telemetry_update.status;
+//    saveValues.package_number = Telemetry_update.package_number;
+    saveValues.telemetry_number = telemetry_number_counter;
+//    saveValues.groundHeight = groundHeight;
+//    saveValues.rotationCount = Telemetry_update.rotation_count;
+    if(saveValues == saveValuesWritten) return;
+
+    crc_fill((uint8_t*)&saveValues, sizeof (saveValues));
+
+    for(int i =0; i < 3; i++){
+//        saveValuesFile[i].open(QIODevice::ReadWrite | QIODevice::Truncate);
+        saveValuesFile[i].resize(0);
+    //    saveValuesFile.seek(0);
+        QByteArray ba(sizeof (saveValues), 0x00);
+        memcpy(ba.data(), &saveValues, sizeof (saveValues));
+        saveValuesFile[i].write(ba);
+        saveValuesFile[i].flush();
+//        saveValuesFile[i].close();
+    }
+    saveValuesWritten = saveValues;
+//    qDebug() << "write: " << ttt.restart();
 }
 
 uint32_t StationTelemetryObject::generateTelemetryNumber(){
-    return telemetry_number_counter++;
+    telemetry_number_counter++;
+    writeSaveValues();
+    return telemetry_number_counter;
+//    return telemetry_number_counter++;
 }

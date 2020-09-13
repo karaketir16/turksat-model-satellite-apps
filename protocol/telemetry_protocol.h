@@ -85,6 +85,9 @@ typedef struct __attribute__((packed)) SaveValues{
     uint16_t package_number;
     uint8_t status;
     float groundHeight;
+    uint32_t rotationCount;
+    uint8_t crca;
+    uint8_t crcb;
 }SaveValues;
 
 bool operator==(const SaveValues a, const SaveValues b);
@@ -126,7 +129,7 @@ typedef struct __attribute__((packed)) Telemetry_Data {
 
     uint16_t rotation_count;
     uint8_t video_check;
-    uint8_t videoPercent;
+    uint32_t lastNotReceivedVideo;
 
     uint8_t crca;
     uint8_t crcb;

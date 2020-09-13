@@ -36,16 +36,18 @@ public:
 
 
 
-    void received_COMMAND_Altitude_Calibrate(uint8_t) override;
-    void received_COMMAND_Seperate_Carrier(uint8_t) override;
-    void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
-    void received_COMMAND_Reset_Package_Number(uint8_t) override;
-    void received_COMMAND_Reset_Satellite_Status(uint8_t) override;
-    void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
-    void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
-    void received_COMMAND_Set_Thrust(uint8_t) override;
-    void received_COMMAND_Set_Seperator(uint8_t) override;
-    void received_COMMAND_Test_Thrust(uint8_t) override;
+//    void received_COMMAND_Altitude_Calibrate(uint8_t) override;
+//    void received_COMMAND_Seperate_Carrier(uint8_t) override;
+//    void received_COMMAND_Reset_Telemetry_Number(uint8_t) override;
+//    void received_COMMAND_Reset_Package_Number(uint8_t) override;
+//    void received_COMMAND_Reset_Satellite_Status(uint8_t) override;
+//    void received_COMMAND_Set_ManuelThrust_off(uint8_t) override;
+//    void received_COMMAND_Set_ManuelThrust_on(uint8_t) override;
+//    void received_COMMAND_Set_Thrust(uint8_t) override;
+//    void received_COMMAND_Set_Seperator(uint8_t) override;
+//    void received_COMMAND_Test_Thrust(uint8_t) override;
+
+    void received_COMMAND(Command) override;
 
     uint32_t generateTelemetryNumber() override;
 
@@ -70,12 +72,14 @@ public:
 
     uint32_t videoSenderIndex = 0;
 
+    uint32_t lastPointVideo = 0;
 
     mainObj * xBee;
 
     MainWindow * wind;
 
 
+    void writeSaveValues() override;
 
 public slots:
     void videoReadyChecker();

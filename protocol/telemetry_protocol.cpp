@@ -5,17 +5,17 @@ QVector<QString> Status_Text = {
     "Başlangıç",
     "Yükselme, 400 metre öncesi",
     "Yükselme, 400 metre sonrası",
-    "Alçalma, Ayrılma Öncesi" ,
-    "Alçalma, Ayrılma",
-    "Alçalma, Ayrılma Sonrası",
-    "Alçalma, Yavaşlama",
+    "Alçalma - Ayrılma Öncesi" ,
+    "Alçalma - Ayrılma",
+    "Alçalma - Ayrılma Sonrası",
+    "Alçalma - Yavaşlama",
     "Yer Seviyesinde",
     "",
     ""};
 
 
 bool operator==(const SaveValues a, const SaveValues b){
-    return a.status == b.status && a.package_number == b.package_number && a.telemetry_number == b.telemetry_number;
+    return a.status == b.status && a.package_number == b.package_number && a.telemetry_number == b.telemetry_number && a.rotationCount == b.rotationCount;
 }
 
 

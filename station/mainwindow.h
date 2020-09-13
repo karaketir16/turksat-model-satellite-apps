@@ -70,6 +70,10 @@ private slots:
 
     void on_actionStat_S_f_rla_triggered();
 
+    void on_actionGrafikleri_Temizle_triggered();
+
+    void on_actionPaket_Numaras_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTimer tm;
