@@ -20,6 +20,10 @@
 #include <QFile>
 #include "mainwindow.h"
 
+#include <QTcpServer>
+
+#include <QTcpSocket>
+
 class MainWindow;
 
 class StationTelemetryObject : public AbstractTelemetryObject
@@ -28,6 +32,7 @@ class StationTelemetryObject : public AbstractTelemetryObject
     void run() override;
 public:
     StationTelemetryObject();
+
     void received_PACKAGE_Telemetry_Data(Telemetry_Data data) override;
 //    void received_PACKAGE_ACK(ACK ack) override;
     void received_PACKAGE_Set_Video_Name(Set_Video_Name set_video_name) override;
@@ -81,6 +86,10 @@ public:
 
     void writeSaveValues() override;
 
+    QFile reactCommFile;
+    QTextStream reactOut;
+
+
 public slots:
     void videoReadyChecker();
     void videoSender(bool fileName);
@@ -93,6 +102,9 @@ public slots:
 //    void sendResetStatus(uint8_t);
 
     void commandSend(uint8_t, uint8_t);
+
+    void startCSVsave(QString);
+
 signals:
     void newTelemetryData(Telemetry_Data);
 };

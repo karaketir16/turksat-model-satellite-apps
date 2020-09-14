@@ -540,17 +540,17 @@
      <rect>
       <x>490</x>
       <y>0</y>
-      <width>1411</width>
+      <width>1421</width>
       <height>331</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Longitude Grafiği</string>
+          <string>Basınç Zaman Grafiği</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -558,7 +558,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QwtPlot" name="longitudePlot">
+        <widget class="QwtPlot" name="pressurePlot">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -711,17 +711,17 @@
      <rect>
       <x>490</x>
       <y>340</y>
-      <width>1411</width>
+      <width>1421</width>
       <height>331</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_14">
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_14">
          <property name="text">
-          <string>Basınç Zaman Grafiği</string>
+          <string>GPS Enlem Grafiği</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -729,7 +729,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QwtPlot" name="pressurePlot">
+        <widget class="QwtPlot" name="latitudePlot">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -760,11 +760,11 @@
       </spacer>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_14">
+      <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0,0">
        <item>
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="label_13">
          <property name="text">
-          <string>Latitude Grafiği</string>
+          <string>GPS Boylam Grafiği</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -772,7 +772,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QwtPlot" name="latitudePlot">
+        <widget class="QwtPlot" name="longitudePlot">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -807,7 +807,7 @@
        <item>
         <widget class="QLabel" name="label_12">
          <property name="text">
-          <string>Altitude Grafiği</string>
+          <string>GPS Rakım Grafiği</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -1163,6 +1163,74 @@
     </property>
     <property name="readOnly">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>700</y>
+      <width>451</width>
+      <height>84</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_9">
+     <item>
+      <widget class="QLabel" name="label_34">
+       <property name="text">
+        <string>CSV Kayıt Dosya Adı</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_19">
+       <item>
+        <widget class="QLineEdit" name="csvLineText"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="csvSaveButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Kaydı Başlat</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="csvSaveText">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>CSV Kaydı Başlamadı</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="videosenderText">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>730</y>
+      <width>191</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Video Gönderimi Başlamadı</string>
     </property>
    </widget>
   </widget>

@@ -2,15 +2,20 @@
 import logo from './logo.svg';
 import './App.css';
 
+import 'semantic-ui-css/semantic.min.css'
+
+
 // import React, { Component } from 'react';
 import React, { Component,useEffect, useState } from "react";
 
 import Webcam from "react-webcam";
 import 'semantic-ui-css/semantic.min.css'
-import { Dropdown } from 'semantic-ui-react'
+import { Dropdown, GridColumn } from 'semantic-ui-react'
 import socketIOClient from "socket.io-client";
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
+
+import { Grid } from 'semantic-ui-react'
 
 
 
@@ -47,6 +52,9 @@ var LeafIcon = L.Icon.extend({
 });
 
 // var greenIcon = new LeafIcon({iconUrl: 'leaf-green.png'});
+
+
+
 
 
 
@@ -88,21 +96,131 @@ function SimpleExample() {
 
     
     return (
-      
+      <>
       <LeafletMap  viewport={viewport} onViewportChanged={viewPortChanged}>
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url='https://{s}.tile.osm.org/{z}/{x}/{y}.png'
         />
         <Marker position={[pos.lat, pos.long]}>
-          <Popup>
+          {/* <Popup>
             A pretty CSS3 popup. <br/> Easily customizable.
-          </Popup>
+          </Popup> */}
         </Marker>
       </LeafletMap>
+      <b>Enlem {pos.lat}, Boylam {pos.long}</b>
+      </>
     );
   
 }
+
+
+
+
+const WebcamStreamCapture = () => {
+  const webcamRef = React.useRef(null);
+  const mediaRecorderRef = React.useRef(null);
+  const [capturing, setCapturing] = React.useState(false);
+  const [recordedChunks, setRecordedChunks] = React.useState([]);
+
+  // const [downloaded, setDownloaded] = React.useState(null);
+
+  const [deviceId, setDeviceId] = React.useState({});
+  const [devices, setDevices] = React.useState([]);
+  const [options, setOptions] = React.useState([]);
+  const [selected, setSelected] = React.useState(0);
+
+  const handleDevices = React.useCallback(
+    mediaDevices =>{
+        setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
+        setOptions(mediaDevices.filter(({ kind }) => kind === "videoinput").map((device, key) => {
+          return {
+            key: device.deviceId,
+            text : device.label || `Device ${key + 1}`,
+            value : device.deviceId
+          };
+        }));
+    },
+    [setDevices, setOptions]
+  );
+
+  React.useEffect(
+    () => {
+      navigator.mediaDevices.enumerateDevices().then(handleDevices);
+    },
+    [handleDevices]
+  );
+
+
+  const handleStartCaptureClick = React.useCallback(() => {
+    setCapturing(true);
+    mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream, {
+      mimeType: "video/webm"
+    });
+    mediaRecorderRef.current.addEventListener(
+      "dataavailable",
+      handleDataAvailable
+    );
+    mediaRecorderRef.current.start();
+    // setDownloaded(false);
+  }, [webcamRef, setCapturing, mediaRecorderRef]);
+
+  const handleDataAvailable = React.useCallback(
+    ({ data }) => {
+      if (data.size > 0) {
+        setRecordedChunks((prev) => prev.concat(data));
+      }
+    },
+    [setRecordedChunks]
+  );
+
+  const handleStopCaptureClick = React.useCallback(() => {
+    mediaRecorderRef.current.stop();
+    setCapturing(false);
+    
+  }, [mediaRecorderRef, webcamRef, setCapturing]);
+
+  const handleDownload = React.useCallback(() => {
+    if (recordedChunks.length) {
+      const blob = new Blob(recordedChunks, {
+        type: "video/webm"
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = url;
+      a.download = "react-webcam-stream-capture.webm";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setRecordedChunks([]);
+    }
+    // setDownloaded(true);
+  }, [recordedChunks]);
+
+  return (
+    <>
+      <Webcam audio={false} ref={webcamRef}  videoConstraints={{ deviceId: selected }}/>
+      {capturing ? (
+        <button onClick={handleStopCaptureClick}>Video Kaydını Durdur</button>
+      ) : (
+        <button onClick={handleStartCaptureClick}>Vıdeo Kaydını Başlat</button>
+      )}
+      {recordedChunks.length > 0 && (
+        <button onClick={handleDownload}>Vıdeoyu Dosya Sistemine Kaydet</button>
+      )}
+
+<Dropdown
+    placeholder='Kamera veya video alıcısı seçin'
+    fluid
+    selection
+    options={options}
+    onChange={(error, data) => setSelected(data.value)}
+  />
+    </>
+  );
+};
+
 
 
 const WebcamCapture = () => {
@@ -147,7 +265,7 @@ const WebcamCapture = () => {
         </div>
         {console.log("asd", options)}
         <Dropdown
-    placeholder='Select Friend'
+    placeholder='Kamera veya Vıdeo Alıcısı Seçin'
     fluid
     selection
     options={options}
@@ -163,11 +281,17 @@ const WebcamCapture = () => {
 
 function App() {
   return (
-    <div>
-    <SimpleExample />
-    <WebcamCapture />
+    <Grid>
+      <Grid.Column width={8}>
+        <SimpleExample />
+      </Grid.Column>
+      <Grid.Column width={8}>
+        <WebcamStreamCapture />
+      </Grid.Column>
 
-    </div>
+    {/* <WebcamCapture /> */}
+    
+    </Grid>
   );
 }
 

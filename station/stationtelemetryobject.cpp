@@ -4,16 +4,22 @@
 #include <QFileInfo>
 #include <QDateTime>
 
-#define SAVE_FILE "KaldigimizYerdenDevamiSaglayanDosya.nevfeza"
+#define SAVE_FILE   "KaldigimizYerdenDevamiSaglayanDosya.nevfeza"
+#define REACT_FILE  "../coordAktarim.json"
+#define SAVE_FOLDER "/home/karaketir16/TURKSAT/"
 
 StationTelemetryObject::StationTelemetryObject()
 {
     receiver = 0x0037;
-}
 
 
-void StationTelemetryObject::run(){
 
+
+    reactCommFile.setFileName(REACT_FILE);
+
+    reactCommFile.open(QIODevice::ReadWrite);
+
+    reactOut.setDevice(&reactCommFile);
 
 //    StationTelemetryObject tmObj;
     QTimer::singleShot(500, [&](){
@@ -26,14 +32,6 @@ void StationTelemetryObject::run(){
         QObject::connect(xBee, &mainObj::receive, this, &StationTelemetryObject::received_DATA);
     });
 
-    telemetryFile.setFileName(QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString(".csv"));
-    telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
-    telemetyOutput.setDevice((&telemetryFile));
-    telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
-                     "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
-                     "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
-
-    telemetyOutput.flush();
 
 
     for(int i = 0; i < 3 ; i++){
@@ -56,6 +54,34 @@ void StationTelemetryObject::run(){
         }
 
     }
+
+}
+
+
+void StationTelemetryObject::startCSVsave(QString csvFileName){
+
+    if(csvFileName.right(4) != QString(".csv")){
+        csvFileName += ".csv";
+    }
+    telemetryFile.setFileName(SAVE_FOLDER + csvFileName);
+    telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    telemetyOutput.setDevice((&telemetryFile));
+
+    if(telemetyOutput.device()){
+        telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
+                         "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
+                         "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
+
+        telemetyOutput.flush();
+    }
+
+
+    qDebug() << "KAYIT";
+
+}
+
+void StationTelemetryObject::run(){
+
 
 
     this->exec();
@@ -126,9 +152,7 @@ void StationTelemetryObject::videoSender(bool firstTime){
 
     if(videoNameSetted || ackedPackages.contains(videoSetTelemNumber)){
         videoNameSetted = true;
-//        while(lastPoint < videoPartCount && ackedVideoParts.contains(lastPoint)){
-//            lastPoint++;
-//        }
+
         lastPoint = lastPointVideo;
 
         if(videoSenderIndex < 100/*1000*/ && (videoSenderIndex + lastPoint) < videoPartCount){
@@ -157,25 +181,6 @@ void StationTelemetryObject::videoSender(bool firstTime){
         else{
             videoSenderIndex = 0;
         }
-//        qDebug()
-
-
-
-//        for(uint32_t i = 0; i < 50 && (i + lastPoint) < videoPartCount; i++){
-//            auto packet = videoPackets[i + lastPoint];
-//            if(ackedVideoParts[i + lastPoint])
-//                continue;
-//            qDebug() << "send: " << i + lastPoint;
-//            Video_Data vd;
-//            vd.header.type = PACKAGE_Video_Data;
-//            vd.video_data_len = packet.size();
-//            vd.video_packet_number = i + lastPoint;
-
-////            qDebug() << "will send: " << packet.toHex();
-//            memcpy(vd.video_data, packet.data(), vd.video_data_len);
-
-//            reSender(to_byte_array(&vd, sizeof(vd)), false, true);
-//        }
     }
 
     if(lastPoint != videoPartCount){
@@ -200,7 +205,7 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
 
     qDebug() <<"+++++++++++++++++++++++++++++++++";
     qDebug() << "Package Number: " << data.package_number;
-    qDebug() << "Latitude: " << QString::number( data.gps_latitude, 'g', 10) << " Longtitude: " << data.gps_longtitude << " Altitude: " << data.gps_altiude;
+    qDebug() << "Latitude: " << data.gps_latitude << " Longtitude: " << data.gps_longtitude << " Altitude: " << data.gps_altiude;
     qDebug() << "Date: " << data.day << "/" << data.month << "/" << data.year <<
                 " time: " << data.hour << ":" << data.minute << ":" << data.second;
     qDebug() << "Pitch: " << data.pitch << " Roll: " <<data.roll << " Yaw: " << data.yaw;
@@ -214,32 +219,37 @@ void StationTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data data
     qDebug() << "LastVideo" << data.lastNotReceivedVideo;
     qDebug() <<"+++++++++++++++++++++++++++++++++";
 
-    telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
-                     "%7,%8,%9,%10,%11,"
-                     "%12,%13,%14,%15,%16,%17\n")
-              .arg(data.team_no)
-              .arg(data.package_number)
-              .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
-              .arg(data.pressure)
-              .arg(data.height)
-              .arg(data.speed)
-              .arg(data.temperature)
-              .arg(data.voltage)
-              .arg(data.gps_latitude)
-              .arg(data.gps_longtitude)
-              .arg(data.gps_altiude)
-              .arg(Status_Text[data.status]) //Status
-              .arg(data.pitch)
-              .arg(data.roll)
-              .arg(data.yaw)
-              .arg(data.rotation_count)
-              .arg(data.video_check ? "Evet" : "Hayır");
+    if(telemetyOutput.device()){
+        telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
+                         "%7,%8,%9,%10,%11,"
+                         "%12,%13,%14,%15,%16,%17\n")
+                  .arg(data.team_no)
+                  .arg(data.package_number)
+                  .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
+                  .arg(data.pressure)
+                  .arg(data.height)
+                  .arg(data.speed)
+                  .arg(data.temperature)
+                  .arg(data.voltage)
+                  .arg(data.gps_latitude)
+                  .arg(data.gps_longtitude)
+                  .arg(data.gps_altiude)
+                  .arg(Status_Text[data.status]) //Status
+                  .arg(data.pitch)
+                  .arg(data.roll)
+                  .arg(data.yaw)
+                  .arg(data.rotation_count)
+                  .arg(data.video_check ? "Evet" : "Hayır");
 
-    telemetyOutput.flush();
-//    wind->newTelemetryData(data);
+        telemetyOutput.flush();
+    }
+
+    reactCommFile.resize(0);
+    reactOut << QString("{ \"lat\":%1, \"long\":%2}").arg(QString::number(data.gps_latitude, 'g', 10)).arg(QString::number(data.gps_longtitude, 'g', 10));
+    reactOut.flush();
+    //    wind->newTelemetryData(data);
     emit newTelemetryData(data);
 //    qDebug() <<
-    //TODO
 }
 
 //void StationTelemetryObject::received_PACKAGE_ACK(ACK ack){
@@ -269,11 +279,9 @@ void StationTelemetryObject::received_COMMAND(Command){
 
 
 void StationTelemetryObject::writeSaveValues(){
-//    saveValues.status = Telemetry_update.status;
-//    saveValues.package_number = Telemetry_update.package_number;
+
     saveValues.telemetry_number = telemetry_number_counter;
-//    saveValues.groundHeight = groundHeight;
-//    saveValues.rotationCount = Telemetry_update.rotation_count;
+
     if(saveValues == saveValuesWritten) return;
 
     crc_fill((uint8_t*)&saveValues, sizeof (saveValues));
@@ -298,3 +306,5 @@ uint32_t StationTelemetryObject::generateTelemetryNumber(){
     return telemetry_number_counter;
 //    return telemetry_number_counter++;
 }
+
+

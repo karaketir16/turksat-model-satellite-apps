@@ -1,9 +1,7 @@
 #include "satellitetelemetryobject.h"
 
-#define VIDEO_PATH "/"
-#define SAVE_FILE "KaldigimizYerdenDevamiSaglayanDosya.nevfeza"
-#define GROUND_FILE "zemin_yukseklik"
-
+#define VIDEO_PATH "/TURKSAT/"
+#define SAVE_FILE "packetNumberSaveRecover.nevfeza"
 
 #include <math.h>
 #include <QDateTime>
@@ -18,16 +16,6 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
 
 
     //    telemetryFile.set
-    telemetryFile.setFileName(QString(VIDEO_PATH) + QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString(".csv"));
-
-    telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
-
-    telemetyOutput.setDevice(&telemetryFile);
-    telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
-                     "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
-                     "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
-
-    telemetyOutput.flush();
 
 
     Telemetry_update = {{0,0}, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -90,7 +78,7 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
 
         qDebug() << status;
         qDebug() << "Should be " << 0x49D4;
-        Q_ASSERT(status == 0x49D4);
+//        Q_ASSERT(status == 0x49D4);
 
         tmLMH.setInterval(75);
         tmLMH.start();
@@ -228,21 +216,15 @@ float SatelliteTelemetryObject::heightCalculator(float hPa, float p0){
 
 }
 
+float latLong(float a){
+    int degree = a / 100;
+    a -= degree * 100;
+    float res = a/60;
+    return degree + res;
+}
+
 void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
-    /*
-    qDebug() << "recevied Lat: " << np.gps_latitude;
-    qDebug() << "recevied Long: " << np.gps_longtitude;
-    qDebug() << "recevied Alt: " << np.gps_altitude;
-    qDebug() << "recevied Fix: " << np.gps_fix;
-    qDebug() << "recevied hour: " << np.hour;
-    qDebug() << "recevied minute: " << np.minute;
-    qDebug() << "recevied seconds: " << np.second;
-    qDebug() << "received pressure: " << np.pressure;
-    qDebug() << "received voltage: " << np.voltage;
-    qDebug() << "Temp : " << np.temp;
-    qDebug() << "-----------------";
-    */
     Telemetry_update.day = np.day;
     Telemetry_update.hour = np.hour;
     Telemetry_update.year = np.year;
@@ -250,24 +232,18 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.minute = np.minute;
     Telemetry_update.second = np.second;
     Telemetry_update.gps_altiude = np.gps_altitude;
-    Telemetry_update.gps_latitude = np.gps_latitude;
-    Telemetry_update.gps_longtitude = np.gps_longtitude;
+    Telemetry_update.gps_latitude =latLong(np.gps_latitude);
+    Telemetry_update.gps_longtitude = latLong(np.gps_longtitude);
 
     addPressure(np.pressure);
     Telemetry_update.pressure = getAveragePressure();
-//    qDebug() << pressureValues;
-//    qDebug() << getAveragePressure();
+
 
     addVoltage(np.voltage);
     Telemetry_update.voltage = getAverageVoltage();
 
     Telemetry_update.temperature = np.temp;
     Telemetry_update.GPS_fix = np.gps_fix;
-
-//    auto tempTemp = 25.0;
-
-//    auto powed = pow(( / ),(1/5.257)) - 1;
-
 
     auto newHeight = heightCalculator(getAveragePressure(), pressure0);
 
@@ -287,6 +263,28 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
 
     Telemetry_update.status = calcSatelliteStatus();
+
+
+
+
+
+
+
+    auto &data = Telemetry_update;
+
+    if(data.day != 0 &&  !  telemetyOutput.device()){
+        telemetryFile.setFileName(QString(VIDEO_PATH) + QString("%1_%2_%3__%4_%5_%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second)+ QString(".csv"));
+
+        telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+
+        telemetyOutput.setDevice(&telemetryFile);
+        telemetyOutput << QString("Takim No,Paket No,Gönderme Saati,Basınç,Yükseklik,İniş Hızı,"
+                         "Sıcaklık,Pil Gerilimi,GPS Latitude,GPS Longitude,GPS ALtitude,"
+                         "Uydu Statüsü,Pitch,Roll,Yaw,Dönüş Sayısı,Video Aktarım Bilgisi\n");
+
+        telemetyOutput.flush();
+    }
+
 }
 
 //Giving high ms will block to program, zero infinite beeps, no block
@@ -299,8 +297,6 @@ void SatelliteTelemetryObject::beepBuzzer(int ms){
 }
 
 uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
-//    static bool something = true;
-//    static bool cancel
 
     switch (Telemetry_update.status) {
         case Status_Enum::NONE:
@@ -437,28 +433,19 @@ void SatelliteTelemetryObject::received_PACKAGE_Telemetry_Data(Telemetry_Data da
 //}
 
 void SatelliteTelemetryObject::received_PACKAGE_Set_Video_Name(Set_Video_Name set_video_name){
+    videoWritePointer = 0;
     expectedVideoParts = set_video_name.video_packet_count;
     videoData = QVector<QByteArray>(expectedVideoParts);
-    videoFile.setFileName(QString(VIDEO_PATH) + QString("_")+QDateTime::currentDateTime().toString("ddMMyyyy_hhmmss") + QString((char*)set_video_name.name)); //TODO video PATH
+    videoFile.setFileName(QString(VIDEO_PATH) + QString((char*)set_video_name.name)); //TODO video PATH
     if( ! videoFile.open(QIODevice::ReadWrite | QIODevice::Truncate)){
         qDebug() << "Cannot Open";
     }
     qDebug() << "Set Video Name: " << QString((char*)set_video_name.name);
 
     testTimer.start();
-//    ACK ack;
-//    ack.header.type = PACKAGE_ACK;
-//    ack.header.telemetry_number = 0;
-//    ack.ack_telemetry_number =
-//    send(to_byte_array())
 }
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data){
-//    qDebug() <<"video pac number: " << video_data.video_packet_number;
-//    qDebug() << "A";
-//    if(video_data.video_packet_number >= expectedVideoParts){
 
-//    }
-//    qDebug() << "B";
     if(videoData[video_data.video_packet_number].size() != 0){
         //duplicate Video package
         qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
@@ -468,26 +455,18 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
         memcpy(tmp.data(), video_data.video_data, video_data.video_data_len);
         videoData[video_data.video_packet_number] = tmp;
     }
-//    qDebug() << "C";
-
-//    qDebug() << "getted video data: " << tmp.toHex();
-
 
 
     while(videoWritePointer < expectedVideoParts && videoData[videoWritePointer].size() != 0){
         videoFile.write(videoData[videoWritePointer++]);
     }
-//    qDebug() << "D";
-
 
     videoFile.flush();
     if(videoWritePointer == expectedVideoParts){
         Telemetry_update.video_check = true;
-    } else{
-//        qDebug() << "write Pointer" << videoWritePointer <<" nextSize: " << videoData[videoWritePointer].size();
     }
     Telemetry_update.lastNotReceivedVideo = videoWritePointer;
-//    qDebug() << "E";
+
 }
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK){
     //Not Implemented
@@ -496,6 +475,7 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vi
 
 
 void SatelliteTelemetryObject::Altitude_Calibrate(uint8_t data){
+    Q_UNUSED(data);
 //    groundAltitude = Telemetry_update.gps_altiude;
 //    groundPressure = Telemetry_update.pressure;
     groundHeight = heightCalculator(getAveragePressure(), pressure0);
@@ -506,35 +486,34 @@ void SatelliteTelemetryObject::Altitude_Calibrate(uint8_t data){
     writeSaveValues();
 }
 void SatelliteTelemetryObject::Seperate_Carrier(uint8_t data){
-//    QProcess::execute("onion pwm 1 13.7 100");
+    Q_UNUSED(data);
+    beepBuzzer(500);
     QString str = QString("gpio -g pwm ") + QString(" 12 ") + QString::number((int) SEPERATOR_SEPERATED);
     QProcess::execute(str);
-//    Q_ASSERT(false);
-//    usleep(10000000000);
-
 }
 void SatelliteTelemetryObject::Reset_Telemetry_Number(uint8_t data){
+    Q_UNUSED(data);
     telemetry_number_counter = 0;
     writeSaveValues();
-    //TODO do file operations
+
 }
 void SatelliteTelemetryObject::Reset_Package_Number(uint8_t data){
-//    qDebug() << "Rest"
+    Q_UNUSED(data);
     Telemetry_update.package_number = 0;
     rotationCounter = 0;
     writeSaveValues();
-    //TODO do file operations
 }
 void SatelliteTelemetryObject::Reset_Satellite_Status(uint8_t data){
-//    Telemetry_update.package_number = 0;
+    Q_UNUSED(data);
     Telemetry_update.status = Status_Enum::NONE;
     writeSaveValues();
-    //TODO do file operations
 }
 void SatelliteTelemetryObject::Set_ManuelThrust_off(uint8_t data){
+    Q_UNUSED(data);
     manuelThrust = false;
 }
 void SatelliteTelemetryObject::Set_ManuelThrust_on(uint8_t data){
+    Q_UNUSED(data);
     manuelThrust = true;
 }
 void SatelliteTelemetryObject::Set_Thrust(uint8_t data){
@@ -549,10 +528,10 @@ uint32_t SatelliteTelemetryObject::generateTelemetryNumber(){
     telemetry_number_counter++;
     writeSaveValues();
     return telemetry_number_counter;
-//    return telemetry_number_counter++;
 }
 
 void SatelliteTelemetryObject::Test_Thrust(uint8_t data){
+    Q_UNUSED(data);
 
 //    Q_ASSERT(false);
     MOTOR_ARM();
@@ -574,7 +553,6 @@ void SatelliteTelemetryObject::Test_Thrust(uint8_t data){
 void SatelliteTelemetryObject::Set_Seperator(uint8_t data){
     auto step = (SEPERATOR_SEPERATED - SEPERATOR_NOT_SEPERATED) / 100.0;
     auto res = SEPERATOR_NOT_SEPERATED + (step * data);
-//     = "onion pwm 1 " + QString::number(res,'f',2) + " 100";
     QString str = QString("gpio -g pwm ") + QString(" 12 ") + QString::number((int) res);
     QProcess::execute(str);
     qDebug() <<"data: " << data << "#### " << str;
@@ -589,15 +567,14 @@ void SatelliteTelemetryObject::loop(){ //Update to toSent
 
 //    reSender(toSent, false, true);
 
-    if(expectedVideoParts){
-        qDebug() << "Video percentage: " << 100 * videoWritePointer / (expectedVideoParts * 1.0);
-        qDebug() << "time: "<< testTimer.elapsed() / 1000;
-    }else{
-        qDebug() << "Video Not Started";
-    }
+//    if(expectedVideoParts){
+//        qDebug() << "Video percentage: " << 100 * videoWritePointer / (expectedVideoParts * 1.0);
+//        qDebug() << "time: "<< testTimer.elapsed() / 1000;
+//    }else{
+//        qDebug() << "Video Not Started";
+//    }
 
-
-    QTimer::singleShot(1000,this,&SatelliteTelemetryObject::loop);
+//    QTimer::singleShot(1000,this,&SatelliteTelemetryObject::loop);
 }
 
 void SatelliteTelemetryObject::telemetrySetter(){
@@ -611,29 +588,30 @@ void SatelliteTelemetryObject::telemetrySetter(){
 
     const auto &data = Telemetry_update;
 
+    if(telemetyOutput.device()){
+        telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
+                         "%7,%8,%9,%10,%11,"
+                         "%12,%13,%14,%15,%16,%17\n")
+                  .arg(data.team_no)
+                  .arg(data.package_number)
+                  .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
+                  .arg(data.pressure)
+                  .arg(data.height)
+                  .arg(data.speed)
+                  .arg(data.temperature)
+                  .arg(data.voltage)
+                  .arg(data.gps_latitude)
+                  .arg(data.gps_longtitude)
+                  .arg(data.gps_altiude)
+                  .arg(Status_Text[data.status]) //Status
+                  .arg(data.pitch)
+                  .arg(data.roll)
+                  .arg(data.yaw)
+                  .arg(data.rotation_count)
+                  .arg(data.video_check ? "Evet" : "Hayır");
 
-    telemetyOutput << QString("%1,%2,%3,%4,%5,%6,"
-                     "%7,%8,%9,%10,%11,"
-                     "%12,%13,%14,%15,%16,%17\n")
-              .arg(data.team_no)
-              .arg(data.package_number)
-              .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
-              .arg(data.pressure)
-              .arg(data.height)
-              .arg(data.speed)
-              .arg(data.temperature)
-              .arg(data.voltage)
-              .arg(data.gps_latitude)
-              .arg(data.gps_longtitude)
-              .arg(data.gps_altiude)
-              .arg(Status_Text[data.status]) //Status
-              .arg(data.pitch)
-              .arg(data.roll)
-              .arg(data.yaw)
-              .arg(data.rotation_count)
-              .arg(data.video_check ? "Evet" : "Hayır");
-
-    telemetyOutput.flush();
+        telemetyOutput.flush();
+    }
 }
 
 void SatelliteTelemetryObject::telemetrySender(){

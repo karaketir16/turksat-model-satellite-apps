@@ -1,4 +1,4 @@
-QT       += core gui serialport 3dcore 3drender 3dinput 3dextras multimedia multimediawidgets
+QT       += core gui serialport 3dcore 3drender 3dinput 3dextras multimedia multimediawidgets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

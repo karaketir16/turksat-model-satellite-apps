@@ -22,15 +22,11 @@ SOURCES += \
         ../protocol/protocol.cpp \
         ../protocol/telemetry_protocol.cpp \
         arduinonanoobject.cpp \
-        bme280/bme280.c \
-        bme280/bme280_wrapper.c \
         lsm9ds0/SFE_LSM9DS0.cpp \
         main.cpp \
         my_i2c/my_i2c.c \
         nano_packets.c \
-        satellitetelemetryobject.cpp \
-        test.cpp \
-        test2.cpp
+        satellitetelemetryobject.cpp
 
 # Default rules for deployment.
 target.path = /usr/bin
@@ -43,9 +39,6 @@ HEADERS += \
     ../protocol/mainobj.h \
     ../protocol/protocol.h \
     ../protocol/telemetry_protocol.h \
-    bme280/bme280.h \
-    bme280/bme280_defs.h \
-    bme280/bme280_wrapper.h \
     lsm9ds0/SFE_LSM9DS0.h \
     my_i2c/my_i2c.h \
     satellitetelemetryobject.h

@@ -43,6 +43,17 @@ inline void delay(int ms){
 
 #define DECLINATION 5.75
 
+
+
+#define LSM9DS0_XM  0x1D*2 // Would be 0x1E if SDO_XM is LOW
+#define LSM9DS0_G   0x6B*2 // Would be 0x6A if SDO_G is LOW
+// Create an instance of the LSM9DS0 library called `dof` the
+// parameters for this constructor are:
+// [SPI or I2C Mode declaration],[gyro I2C address],[xm I2C add.]
+LSM9DS0 dof(MODE_I2C, LSM9DS0_G, LSM9DS0_XM);
+
+
+
 LSM9DS0::LSM9DS0(interface_mode interface, uint8_t gAddr, uint8_t xmAddr)
 {
 	// interfaceMode will keep track of whether we're using SPI or I2C:

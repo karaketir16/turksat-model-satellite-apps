@@ -1,0 +1,5 @@
+bu klasörün içine sağ tıklayıp open in terminal dedikten sonra açılan terminale
+
+./runServer.sh
+
+yazılıp entera basılacak

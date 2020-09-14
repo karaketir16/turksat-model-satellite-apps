@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     latitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Boylam");
 
     altitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-    altitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Yükseklik");
+    altitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "GPS Rakım");
 
     speedStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     speedStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Hız(m/s)");
@@ -70,48 +70,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-//    grid = new QwtPlotGrid();
-//    grid->attach( ui->heightPlot );
-
-//    curve = new QwtPlotCurve();
-//    curve->setTitle( "Some Points" );
-//    curve->setPen( Qt::blue, 2 );
-//    curve->setRenderHint( QwtPlotItem::RenderAntialiased, true );
-
-//    symbol = new QwtSymbol( QwtSymbol::Ellipse,
-//        QBrush( Qt::yellow ), QPen( Qt::red, 2 ), QSize( 2, 2 ) );
-//    curve->setSymbol( symbol );
-
-
-
-//    QCamera *camera = new QCamera(this);
-
-//    auto viewfinder = new QCameraViewfinder();
-//    viewfinder->show();
-
-//    camera->setViewfinder(viewfinder);
-
-//    auto imageCapture = new QCameraImageCapture(camera);
-
-//    camera->setCaptureMode(QCamera::CaptureStillImage);
-//    camera->start();
-//    QGraphicsScene scene;
-//    QPixmap pixmap(":/nevfeza.png");
-//    scene.addPixmap(pixmap);
-//    //ui->viewer->setScene(&scene);
-
-//    // add here
-//    ui->graphicsView->setScene(&scene);
-//    ui->openGLWidget->whatsThis()
-
-
-
-//    points << QPointF( 0.0, 4.4 ) << QPointF( 1.0, 3.0 )
-//        << QPointF( 2.0, 4.5 ) << QPointF( 3.0, 6.8 )
-//        << QPointF( 4.0, 7.9 ) << QPointF( 5.0, 7.1 );
-//    curve->setSamples( points );
-//    curve->attach( ui->heightPlot );
-
     plotConfig(heightStruct);
     plotConfig(tempStruct);
     plotConfig(longitudeStruct);
@@ -122,34 +80,6 @@ MainWindow::MainWindow(QWidget *parent)
     plotConfig(pressureStruct);
 
 
-//    heightStruct.ptr = ui->heightPlot;
-//    tempStruct.ptr = ui->tempPlot;
-//    longitudeStruct.ptr = ui->longitudePlot;
-//    latitudeStruct.ptr = ui->latitudePlot;
-//    altitudeStruct.ptr = ui->alttudePlot;
-//    speedStruct.ptr = ui->speedPlot;
-//    voltageStruct.ptr = ui->voltagePlot;
-//    pressureStruct.ptr = ui->pressurePlot;
-
-//    tm.setInterval(1000);
-
-//    connect(&tm, &QTimer::timeout, [&](){
-//        heightStruct.points << QPointF( b++, c++);
-//        b += rand() % 2 + 1;
-////        curve->setSamples(points);
-//        heightStruct.curve->setSamples(heightStruct.points);
-////        curve->attach(&plot);
-//        ui->heightPlot->replot();
-////        ui->qwtPlot->show();
-//        qDebug() << "TEST";
-
-//    });
-//    tm.start();
-//    QPixmap pm;
-//    ...
-
-//    ui->Image->setPixmap(pixmap);
-//     ui->simulationTest->setPixmap(pm.transformed(trans));
 }
 
 float removePrec(float prec, float value){
@@ -187,12 +117,12 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
     ui->textTemp->setText(QString::number(data.temperature, 'g', 2));
 
     if(data.GPS_fix){
-        longitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_longtitude));
+        longitudeStruct.points << QPointF(data.package_number, removePrec(0.001, data.gps_longtitude));
         rePlot(longitudeStruct);
         ui->textLong->setText(QString::number(data.gps_longtitude, 'g', 10));
 
 
-        latitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_latitude));
+        latitudeStruct.points << QPointF(data.package_number, removePrec(0.001, data.gps_latitude));
         rePlot(latitudeStruct);
         ui->textLat->setText(QString::number(data.gps_latitude, 'g', 10));
 
@@ -261,6 +191,9 @@ void MainWindow::on_sendButton_clicked()
     stationTelemetryObject->videoPath = ui->videoFilePath->text();
     stationTelemetryObject->videoReady = true;
 //    emit sendVideo(ui->videoFilePath->text().toStdString().c_str());
+
+    ui->videosenderText->setText("Video Gönderimi Başladı");
+    ui->videosenderText->setEnabled(true);
 }
 
 
@@ -332,4 +265,22 @@ void MainWindow::on_actionPaket_Numaras_triggered()
     QTimer::singleShot(1200, [&](){
         on_actionGrafikleri_Temizle_triggered();
     });
+}
+
+
+
+void MainWindow::on_csvSaveButton_clicked()
+{
+    emit startCSVsave(ui->csvLineText->text());
+    ui->csvSaveText->setText("CSV Kaydı Başladı");
+    ui->csvSaveText->setEnabled(true);
+}
+
+void MainWindow::on_csvLineText_textChanged(const QString &arg1)
+{
+    if(arg1 != QString("")){
+        ui->csvSaveButton->setEnabled(true);
+    }else{
+        ui->csvSaveButton->setEnabled(false);
+    }
 }

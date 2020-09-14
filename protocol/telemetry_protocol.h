@@ -152,7 +152,7 @@ typedef struct __attribute__((packed)) Command {
 
 typedef struct __attribute__((packed)) Set_Video_Name {
     Telemetry_Header header;
-    uint8_t name[25]; //what if video name larger then 25 ???? //TODO
+    uint8_t name[35]; //what if video name larger then 25 ???? //TODO
     uint16_t video_packet_count;
     uint8_t crca;
     uint8_t crcb;
