@@ -284,3 +284,8 @@ void MainWindow::on_csvLineText_textChanged(const QString &arg1)
         ui->csvSaveButton->setEnabled(false);
     }
 }
+
+void MainWindow::on_actionDVR_Ka_triggered()
+{
+    emit commandSend(Command_Enum::DVR_BUTTON, 0);
+}

@@ -64,6 +64,8 @@ private slots:
 
     void on_csvLineText_textChanged(const QString &arg1);
 
+    void on_actionDVR_Ka_triggered();
+
 private:
     Ui::MainWindow *ui;
     QTimer tm;

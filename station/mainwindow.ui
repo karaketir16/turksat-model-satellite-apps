@@ -1251,6 +1251,7 @@
     <addaction name="actionStat_S_f_rla"/>
     <addaction name="actionPaket_Numaras"/>
     <addaction name="actionGrafikleri_Temizle"/>
+    <addaction name="actionDVR_Ka"/>
    </widget>
    <addaction name="menuMenu"/>
   </widget>
@@ -1275,6 +1276,11 @@
     <string>Grafikleri Temizle</string>
    </property>
   </action>
+  <action name="actionDVR_Ka">
+   <property name="text">
+    <string>DVR Kayıt Durdur - Başlat</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1285,8 +1291,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="rect.qrc"/>
   <include location="logo.qrc"/>
+  <include location="rect.qrc"/>
  </resources>
  <connections/>
 </ui>

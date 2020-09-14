@@ -43,14 +43,15 @@ enum Command_Enum {
     SET_THRUST                  ,
     SET_SEPERATOR               ,
     TEST_THRUST                 ,
+    DVR_BUTTON                  ,
     CMD__MAX__
 };
 
 enum Status_Enum {
     NONE = 0x0          ,
     Start               ,
-    Rising_Before_475   ,
-    Rising_After_475    ,
+    Rising_Before_400   ,
+    Rising_After_400    ,
     Falling_Before_Sep  ,
     Seperating          ,
     Falling_After_Sep   ,

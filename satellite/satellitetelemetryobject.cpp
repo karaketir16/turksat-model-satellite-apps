@@ -304,23 +304,23 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
 
         case Status_Enum::Start:
             if(Telemetry_update.height > 40){
-                Telemetry_update.status = Status_Enum::Rising_Before_475;
+                Telemetry_update.status = Status_Enum::Rising_Before_400;
                 MOTOR_ARM();
             }
             if(Telemetry_update.height > 475){
-                Telemetry_update.status = Status_Enum::Rising_After_475;
+                Telemetry_update.status = Status_Enum::Rising_After_400;
                 MOTOR_ARM();
             }
         break;
 
-        case Status_Enum::Rising_Before_475:
-            if(Telemetry_update.height > 475){
-                Telemetry_update.status = Status_Enum::Rising_After_475;
+        case Status_Enum::Rising_Before_400:
+            if(Telemetry_update.height > 400){
+                Telemetry_update.status = Status_Enum::Rising_After_400;
             }
         break;
 
-        case Status_Enum::Rising_After_475:
-            if(Telemetry_update.height < maxReachedHeight - 75){
+        case Status_Enum::Rising_After_400:
+            if(Telemetry_update.height < maxReachedHeight - 45){
                 Telemetry_update.status = Status_Enum::Falling_Before_Sep;
             }
         break;
@@ -377,7 +377,7 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
         break;
 
         case Status_Enum::Slow_Fall:
-            if(Telemetry_update.height < 5){
+            if(Telemetry_update.height < 3){
 
                 //Turn Off motors
                 settedThrust = 0;
@@ -445,28 +445,28 @@ void SatelliteTelemetryObject::received_PACKAGE_Set_Video_Name(Set_Video_Name se
     testTimer.start();
 }
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data){
+    if(videoFile.isOpen()){
+        if(videoData[video_data.video_packet_number].size() != 0){
+            //duplicate Video package
+            qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
+        }
+        else {
+            QByteArray tmp(video_data.video_data_len,0x00);
+            memcpy(tmp.data(), video_data.video_data, video_data.video_data_len);
+            videoData[video_data.video_packet_number] = tmp;
+        }
 
-    if(videoData[video_data.video_packet_number].size() != 0){
-        //duplicate Video package
-        qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
+
+        while(videoWritePointer < expectedVideoParts && videoData[videoWritePointer].size() != 0){
+            videoFile.write(videoData[videoWritePointer++]);
+        }
+
+        videoFile.flush();
+        if(videoWritePointer == expectedVideoParts){
+            Telemetry_update.video_check = true;
+        }
+        Telemetry_update.lastNotReceivedVideo = videoWritePointer;
     }
-    else {
-        QByteArray tmp(video_data.video_data_len,0x00);
-        memcpy(tmp.data(), video_data.video_data, video_data.video_data_len);
-        videoData[video_data.video_packet_number] = tmp;
-    }
-
-
-    while(videoWritePointer < expectedVideoParts && videoData[videoWritePointer].size() != 0){
-        videoFile.write(videoData[videoWritePointer++]);
-    }
-
-    videoFile.flush();
-    if(videoWritePointer == expectedVideoParts){
-        Telemetry_update.video_check = true;
-    }
-    Telemetry_update.lastNotReceivedVideo = videoWritePointer;
-
 }
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK){
     //Not Implemented
@@ -655,6 +655,9 @@ void SatelliteTelemetryObject::received_COMMAND(Command cmd){
         break;
         case Command_Enum::SET_SEPERATOR:
             Set_Seperator(data);
+        break;
+        case Command_Enum::DVR_BUTTON:
+            pressDvrSaveButton();
         break;
         case Command_Enum::TEST_THRUST:
             Test_Thrust(data);
