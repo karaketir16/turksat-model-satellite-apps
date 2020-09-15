@@ -202,7 +202,7 @@ float SatelliteTelemetryObject::heightCalculator(float hPa, float p0){
 #ifdef HEIGHT_MOCK
 
 
-    if(MOCK_H - groundHeight > 700 ){
+    if(MOCK_H - groundHeight > 500 ){
         MOCK_I = -1;
     }
 
@@ -372,7 +372,7 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
                     }
                 }
                  Set_Thrust(settedThrust);
-                qDebug() << "Setted Thrust: " << settedThrust;
+//                qDebug() << "Setted Thrust: " << settedThrust;
             }
         break;
 
@@ -391,9 +391,7 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
                 Telemetry_update.status = Status_Enum::Ground_After_Fall;
 
                 qDebug() << "DVR will pressed in one minute";
-                QTimer::singleShot(60 * 1000, [&](){
-                    pressDvrSaveButton();
-                });
+                dvrTimer.start();
             }
             else {
                 //Set Motor Speed For slow fall
@@ -411,7 +409,11 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
         break;
 
         case Status_Enum::Ground_After_Fall:
-            //Running Buzzer, never end ?
+            qDebug() << dvrTimer.elapsed();
+            if(dvrTimer.elapsed() > 60 * 1000){
+                pressDvrSaveButton();
+                Telemetry_update.status = Status_Enum::End;
+            }
         break;
 
 
@@ -448,7 +450,7 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
     if(videoFile.isOpen()){
         if(videoData[video_data.video_packet_number].size() != 0){
             //duplicate Video package
-            qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
+//            qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
         }
         else {
             QByteArray tmp(video_data.video_data_len,0x00);

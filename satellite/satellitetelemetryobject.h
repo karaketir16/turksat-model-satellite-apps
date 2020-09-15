@@ -71,7 +71,7 @@ public:
 
     QElapsedTimer testTimer;
 
-
+    QElapsedTimer dvrTimer;
 //    QElapsedTimer IMUspeedTimer;
 
 //    tripleFloat IMUspeed = {0,0,0};

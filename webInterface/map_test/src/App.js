@@ -63,8 +63,8 @@ function SimpleExample() {
   // const [response, setResponse] = useState({lat: 0, long:0});
 
   const [pos, setPos] = useState({
-        lat: 41, 
-        long: 28
+        lat: 0, 
+        long: 0
       });
 
 

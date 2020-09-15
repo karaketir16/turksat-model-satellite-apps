@@ -3,14 +3,14 @@
 QVector<QString> Status_Text = {
     "Beklemede",
     "Başlangıç",
-    "Yükselme, 400 metre öncesi",
-    "Yükselme, 400 metre sonrası",
+    "Yükselme - 400 metre öncesi",
+    "Yükselme - 400 metre sonrası",
     "Alçalma - Ayrılma Öncesi" ,
     "Alçalma - Ayrılma",
     "Alçalma - Ayrılma Sonrası",
     "Alçalma - Yavaşlama",
     "Yer Seviyesinde",
-    "",
+    "Yer Seviyesinde - Kayıt Sonlandırıldı",
     ""};
 
 

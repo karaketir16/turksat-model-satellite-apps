@@ -15,8 +15,8 @@ const io = socketIo(server);
 let interval;
 
 
-let lat = 41;
-let long = 28;
+let lat = 1;
+let long = 1;
 
 io.on("connection", (socket) => {
   console.log("New client connected");

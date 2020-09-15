@@ -178,7 +178,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_fileSelect_clicked()
 {
     auto fileName = QFileDialog::getOpenFileName(this,
-        tr("Dosya seçin"), "/home/karaketir16", tr("Video (*.mp4 *.avi)"));
+        tr("Dosya seçin"), "/home/karaketir16", tr("All Files (*)"));
 
     ui->videoFilePath->setText(fileName);
 
