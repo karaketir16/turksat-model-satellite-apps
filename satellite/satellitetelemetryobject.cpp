@@ -7,6 +7,10 @@
 #include <QDateTime>
 #include <math.h>
 
+
+#define HEIGHT_MOCK
+#undef HEIGHT_MOCK
+
 SatelliteTelemetryObject::SatelliteTelemetryObject()
 {
     receiver = 0x003C;
@@ -190,8 +194,7 @@ float SatelliteTelemetryObject::getAverageVoltage(){
     return tmp;
 }
 
-#define HEIGHT_MOCK
-#undef HEIGHT_MOCK
+
 
 static float MOCK_H = 0;
 static float MOCK_I = 0;

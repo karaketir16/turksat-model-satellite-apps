@@ -8,6 +8,8 @@
 #define REACT_FILE  "../coordAktarim.json"
 #define SAVE_FOLDER "/home/karaketir16/TURKSAT/"
 
+#include <QProcess>
+
 StationTelemetryObject::StationTelemetryObject()
 {
     receiver = 0x0037;

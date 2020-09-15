@@ -7,6 +7,10 @@
 
 #include <QFileDialog>
 
+#include <QProcess>
+
+#define VIDEO_PATH "../video/"
+
 extern uint8_t RSSI;
 
 void MainWindow::plotConfig(PlotStruct &strc){
@@ -188,7 +192,20 @@ void MainWindow::on_fileSelect_clicked()
 
 void MainWindow::on_sendButton_clicked()
 {
-    stationTelemetryObject->videoPath = ui->videoFilePath->text();
+    auto tempPath = ui->videoFilePath->text();
+
+    auto tempFileName =  VIDEO_PATH + QFileInfo(QFile(tempPath)).fileName();
+    if(tempFileName.right(4) == ".mp4"){
+        QProcess::execute("ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName);
+    }
+    else{
+        QProcess::execute("cp " + tempPath + " " + tempFileName);
+    }
+
+
+//    Q_ASSERT(false);
+
+    stationTelemetryObject->videoPath = tempFileName;
     stationTelemetryObject->videoReady = true;
 //    emit sendVideo(ui->videoFilePath->text().toStdString().c_str());
 
