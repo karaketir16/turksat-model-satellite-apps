@@ -25,7 +25,7 @@ void ArduinoNanoObject::receiveData(){
 
     while(incomeBuffer.size() > 0 && incomeBuffer.data()[0] != NANO_START_DELIMITER){
         auto rem = incomeBuffer.remove(0,1);
-        qDebug() << "removed nano: " << rem.toHex();
+//        qDebug() << "removed nano: " << rem.toHex();
     }
     int bufferSize = incomeBuffer.size();
     bool cont = true;

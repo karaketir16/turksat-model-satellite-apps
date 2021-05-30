@@ -6,16 +6,22 @@
 #include <math.h>
 #include <QDateTime>
 #include <math.h>
+#include "lsm9ds1/SparkFunLSM9DS1.h"
+
+
 
 
 #define HEIGHT_MOCK
 #undef HEIGHT_MOCK
+
+#include "minmea/minmea.h"
 
 SatelliteTelemetryObject::SatelliteTelemetryObject()
 {
     receiver = 0x003C;
     QObject::connect(this, &SatelliteTelemetryObject::send, &xbeeObj, &mainObj::send);
     QObject::connect(&xbeeObj, &mainObj::receive, this, &SatelliteTelemetryObject::received_DATA);
+
 
 
 
@@ -73,11 +79,13 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
         QTimer::singleShot(0,this,&SatelliteTelemetryObject::loop);
 
 
-        uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
-                                    dof.A_SCALE_16G, dof.M_SCALE_2GS,
-                                    dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100, "/dev/i2c-1");
+//        uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
+//                                    dof.A_SCALE_16G, dof.M_SCALE_2GS,
+//                                    dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100, "/dev/i2c-1");
 
-        lsmStatus = (0x49D4 == status);
+
+        uint16_t status = dof.begin();
+        lsmStatus = (((WHO_AM_I_AG_RSP << 8) | WHO_AM_I_M_RSP) == status);
 
 
         qDebug() << status;
@@ -226,17 +234,46 @@ float latLong(float a){
     return degree + res;
 }
 
+
 void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
-    Telemetry_update.day = np.day;
-    Telemetry_update.hour = np.hour;
-    Telemetry_update.year = np.year;
-    Telemetry_update.month = np.month;
-    Telemetry_update.minute = np.minute;
-    Telemetry_update.second = np.second;
-    Telemetry_update.gps_altiude = np.gps_altitude;
-    Telemetry_update.gps_latitude =latLong(np.gps_latitude);
-    Telemetry_update.gps_longtitude = latLong(np.gps_longtitude);
+//    Telemetry_update.gps_altiude = np.gps_altitude;
+//    Telemetry_update.gps_latitude =latLong(np.gps_latitude);
+//    Telemetry_update.gps_longtitude = latLong(np.gps_longtitude);
+
+//qDebug()  << "GPS: " << np.gps_string;
+
+const char* line = np.gps_string;
+
+switch (minmea_sentence_id(line, false)) {
+            case MINMEA_SENTENCE_RMC: {
+                struct minmea_sentence_rmc frame;
+                if (minmea_parse_rmc(&frame, line)) {
+
+                    auto fix_check = minmea_tocoord(&frame.latitude);
+
+                    Telemetry_update.GPS_fix = (fix_check == fix_check);
+
+                    Telemetry_update.gps_latitude = minmea_tocoord(&frame.latitude);
+                    Telemetry_update.gps_longtitude = minmea_tocoord(&frame.longitude);
+
+                    Telemetry_update.year = frame.date.year;
+                    Telemetry_update.month = frame.date.month;
+                    Telemetry_update.day = frame.date.day;
+
+                    Telemetry_update.hour = frame.time.hours;
+                    Telemetry_update.minute = frame.time.minutes;
+                    Telemetry_update.second = frame.time.seconds;
+
+                }
+                else {
+                    qDebug() << "gps not fix or someting";
+                }
+            } break;
+default:
+    qDebug() << "sentence error";
+}
+
 
     addPressure(np.pressure);
     Telemetry_update.pressure = getAveragePressure();
@@ -246,7 +283,8 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.voltage = getAverageVoltage();
 
     Telemetry_update.temperature = np.temp;
-    Telemetry_update.GPS_fix = np.gps_fix;
+
+//    Telemetry_update.GPS_fix = np.gps_fix;
 
     auto newHeight = heightCalculator(getAveragePressure(), pressure0);
 
@@ -268,15 +306,11 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.status = calcSatelliteStatus();
 
 
-
-
-
-
-
     auto &data = Telemetry_update;
 
     if(data.day != 0 &&  !  telemetyOutput.device()){
-        telemetryFile.setFileName(QString(VIDEO_PATH) + QString("%1_%2_%3__%4_%5_%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second)+ QString(".csv"));
+        telemetryFile.setFileName(QString(VIDEO_PATH) + QString("%1_%2_%3__%4_%5_%6").arg(data.day).
+                                  arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second)+ QString(".csv"));
 
         telemetryFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
 
@@ -617,6 +651,27 @@ void SatelliteTelemetryObject::telemetrySetter(){
 
         telemetyOutput.flush();
     }
+
+    qDebug()  << QString("%1,%2,%3,%4,%5,%6,"
+                                                  "%7,%8,%9,%10,%11,"
+                                                  "%12,%13,%14,%15,%16,%17\n")
+                                           .arg(data.team_no)
+                                           .arg(data.package_number)
+                                           .arg(QString("%1/%2/%3 - %4:%5:%6").arg(data.day).arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second))
+                                           .arg(data.pressure)
+                                           .arg(data.height)
+                                           .arg(data.speed)
+                                           .arg(data.temperature)
+                                           .arg(data.voltage)
+                                           .arg(data.gps_latitude)
+                                           .arg(data.gps_longtitude)
+                                           .arg(data.gps_altiude)
+                                           .arg(Status_Text[data.status]) //Status
+                                           .arg(data.pitch)
+                                           .arg(data.roll)
+                                           .arg(data.yaw)
+                                           .arg(data.rotation_count)
+                                           .arg(data.video_check ? "Evet" : "Hayır");
 }
 
 void SatelliteTelemetryObject::telemetrySender(){
@@ -645,6 +700,7 @@ void SatelliteTelemetryObject::received_COMMAND(Command cmd){
         break;
         case Command_Enum::RESET_PACKAGE_NUMBER:
             Reset_Package_Number(data);
+            this->beepBuzzer(50);
         break;
         case Command_Enum::RESET_SATELLITE_STATUS:
             Reset_Satellite_Status(data);

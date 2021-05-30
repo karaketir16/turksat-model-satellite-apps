@@ -7,10 +7,12 @@ mainObj::mainObj(QObject *parent) : QObject(parent)
 {
     serial = new QSerialPort();
     serial->setPortName(serialPortName);
-    serial->setBaudRate(QSerialPort::Baud115200);
-    while( ! serial->open(QSerialPort::ReadWrite)){
-        qDebug() << "Cannot open " << serialPortName;
-    }
+    serial->setBaudRate(230400);
+    qDebug() << "try open :" << serialPortName ;
+    Q_ASSERT(serial->open(QSerialPort::ReadWrite));
+//    if( ! serial->open(QSerialPort::ReadWrite)){
+//        qDebug() << "Cannot open " << serialPortName;
+//    }
     qDebug() << "opened UART";
 
     connect(serial, &QSerialPort::readyRead, this, &mainObj::receiveData);
