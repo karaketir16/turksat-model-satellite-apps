@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QElapsedTimer>
-#include "lsm9ds0/SFE_LSM9DS0.h"
+//#include "lsm9ds0/SFE_LSM9DS0.h"
 #include "nano_packets.h"
 #include "../protocol/mainobj.h"
 

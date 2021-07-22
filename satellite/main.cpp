@@ -21,7 +21,7 @@ extern "C" {
 
 #include "satellitetelemetryobject.h"
 #include "arduinonanoobject.h"
-#include "./lsm9ds0/SFE_LSM9DS0.h"
+//#include "./lsm9ds0/SFE_LSM9DS0.h"
 
 QByteArray getted;
 QString serialPortName = "ttyS0";

@@ -1,7 +1,11 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
+//#include <Adafruit_BME280.h>
+
+#include "Adafruit_BMP3XX.h"
+
+
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
 
@@ -58,7 +62,11 @@ auto &mySerial = Serial;
 
 #define SEALEVELPRESSURE_HPA (1004.63)
 
-Adafruit_BME280 bme(BME_CS); // hardware SPI
+//Adafruit_BME280 bme(BME_CS); // hardware SPI/
+
+
+Adafruit_BMP3XX bmp;
+
 
 #define PMTK_SET_BAUD_38400 "$PMTK251,38400*27"
 
@@ -135,7 +143,9 @@ void setup()
 //  mySerial.println(PMTK_Q_RELEASE);
   
 
-  unsigned status = bme.begin(); 
+//  unsigned status = bme.begin(); /
+    unsigned status = bmp.begin_SPI(BME_CS);
+
 
 }
 
@@ -166,6 +176,8 @@ void loop()                     // run over and over again
         float v1 = (sensorValue)*5.0/1023.0;
         float voltage = (3.025)*v1;
 
+        bmp.performReading();
+
 
         toSent.gps_longtitude = GPS.longitude; 
         toSent.gps_latitude = GPS.latitude;
@@ -177,8 +189,11 @@ void loop()                     // run over and over again
         toSent.day = GPS.day;
         toSent.month = GPS.month;
         toSent.year = GPS.year;
-        toSent.pressure = bme.readPressure() / 100.0F;
-        toSent.temp = bme.readTemperature();
+//        toSent.pressure = bme.readPressure() / 100.0F;
+//        toSent.temp = bme.readTemperature();
+//
+       toSent.pressure = bmp.pressure / 100.0F;
+       toSent.temp = bmp.temperature;
         
         toSent.voltage = voltage;
         

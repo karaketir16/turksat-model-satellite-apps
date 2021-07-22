@@ -6,7 +6,7 @@
 #include <math.h>
 #include <QDateTime>
 #include <math.h>
-
+#include "lsm9ds1/SparkFunLSM9DS1.h"
 
 #define HEIGHT_MOCK
 #undef HEIGHT_MOCK
@@ -73,15 +73,15 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
         QTimer::singleShot(0,this,&SatelliteTelemetryObject::loop);
 
 
-        uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
-                                    dof.A_SCALE_16G, dof.M_SCALE_2GS,
-                                    dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100, "/dev/i2c-1");
+//        uint16_t status = dof.begin(dof.G_SCALE_2000DPS,
+//                                    dof.A_SCALE_16G, dof.M_SCALE_2GS,
+//                                    dof.G_ODR_95_BW_125, dof.A_ODR_400, dof.M_ODR_100, "/dev/i2c-1");
 
-        lsmStatus = (0x49D4 == status);
-
+        uint16_t status = dof.begin();
+        lsmStatus = (((WHO_AM_I_AG_RSP << 8) | WHO_AM_I_M_RSP) == status);
 
         qDebug() << status;
-        qDebug() << "Should be " << 0x49D4;
+        qDebug() << "Should be " << ((WHO_AM_I_AG_RSP << 8) | WHO_AM_I_M_RSP);
 //        Q_ASSERT(status == 0x49D4);
 
         tmLMH.setInterval(75);
