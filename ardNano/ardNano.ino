@@ -157,6 +157,8 @@ void loop()                     // run over and over again
 // mySerial.println("ne?");
  
   char c = GPS.read();
+//  if(c)
+//    mySerial.write(c);
 
   // if a sentence is received, we can check the checksum, parse it...
   if (GPS.newNMEAreceived()) {
@@ -174,7 +176,7 @@ void loop()                     // run over and over again
 
         int sensorValue = analogRead(A0);
         float v1 = (sensorValue)*5.0/1023.0;
-        float voltage = (3.025)*v1;
+        float voltage = (2.9)*v1;
 
         bmp.performReading();
 
@@ -198,6 +200,13 @@ void loop()                     // run over and over again
         toSent.voltage = voltage;
         
         calcChecksum(&toSent);
+
+//        mySerial.print("pressure: ");
+//        mySerial.println(toSent.pressure);
+//        mySerial.print("temp: ");
+//        mySerial.println(toSent.temp);
+//        mySerial.print("volt: ");
+//        mySerial.println(toSent.voltage);
         
         mySerial.write((uint8_t*) &toSent, sizeof(nano_package));
       }

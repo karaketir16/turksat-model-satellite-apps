@@ -8,10 +8,11 @@ ArduinoNanoObject::ArduinoNanoObject(QObject *parent) : QObject(parent)
     serial = new QSerialPort();
     serial->setPortName(serialPortNameNano);
     serial->setBaudRate(QSerialPort::Baud115200);
-    while( ! serial->open(QSerialPort::ReadWrite)){
+    if( ! serial->open(QSerialPort::ReadWrite)){
         qDebug() << "Cannot open " << serialPortNameNano;
     }
-    qDebug() << "opened UART";
+    else
+        qDebug() << "opened UART";
 
     connect(serial, &QSerialPort::readyRead, this, &ArduinoNanoObject::receiveData);
 }

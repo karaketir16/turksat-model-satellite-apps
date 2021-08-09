@@ -39,9 +39,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     heightStruct.ptr = ui->heightPlot;
     tempStruct.ptr = ui->tempPlot;
-    longitudeStruct.ptr = ui->longitudePlot;
-    latitudeStruct.ptr = ui->latitudePlot;
-    altitudeStruct.ptr = ui->alttudePlot;
+//    longitudeStruct.ptr = ui->longitudePlot;
+//    latitudeStruct.ptr = ui->latitudePlot;
+//    altitudeStruct.ptr = ui->alttudePlot;
     speedStruct.ptr = ui->speedPlot;
     voltageStruct.ptr = ui->voltagePlot;
     pressureStruct.ptr = ui->pressurePlot;
@@ -54,14 +54,14 @@ MainWindow::MainWindow(QWidget *parent)
     tempStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     tempStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Sıcaklık(°C)");
 
-    longitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-    longitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Enlem");
+//    longitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
+//    longitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Enlem");
 
-    latitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-    latitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Boylam");
+//    latitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
+//    latitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Boylam");
 
-    altitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-    altitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "GPS Rakım");
+//    altitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
+//    altitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "GPS Rakım");
 
     speedStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     speedStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Hız(m/s)");
@@ -76,9 +76,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     plotConfig(heightStruct);
     plotConfig(tempStruct);
-    plotConfig(longitudeStruct);
-    plotConfig(latitudeStruct);
-    plotConfig(altitudeStruct);
+//    plotConfig(longitudeStruct);
+//    plotConfig(latitudeStruct);
+//    plotConfig(altitudeStruct);
     plotConfig(speedStruct);
     plotConfig(voltageStruct);
     plotConfig(pressureStruct);
