@@ -886,6 +886,17 @@
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>1120</x>
+      <y>10</y>
+      <width>791</width>
+      <height>951</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="webly"/>
+   </widget>
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
@@ -1076,6 +1087,19 @@
      </item>
     </layout>
    </widget>
+   <zorder>verticalLayoutWidget_6</zorder>
+   <zorder>horizontalLayoutWidget</zorder>
+   <zorder>verticalLayoutWidget</zorder>
+   <zorder>seperateCommand</zorder>
+   <zorder>testThrust</zorder>
+   <zorder>horizontalLayoutWidget_3</zorder>
+   <zorder>horizontalLayoutWidget_4</zorder>
+   <zorder>horizontalLayoutWidget_5</zorder>
+   <zorder>checkBox</zorder>
+   <zorder>engineThrustText</zorder>
+   <zorder>verticalLayoutWidget_2</zorder>
+   <zorder>verticalLayoutWidget_3</zorder>
+   <zorder>simulationTest</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

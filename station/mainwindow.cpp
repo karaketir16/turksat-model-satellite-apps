@@ -11,6 +11,8 @@
 
 #define VIDEO_PATH "../video/"
 
+#include <QWebEngineProfile>
+
 extern uint8_t RSSI;
 
 void MainWindow::plotConfig(PlotStruct &strc){
@@ -27,6 +29,23 @@ void MainWindow::plotConfig(PlotStruct &strc){
 //    strc.curve->setSymbol( strc.symbol );
 }
 
+void MainWindow::downloadRequested(QWebEngineDownloadItem* download) {
+        if (download->savePageFormat() != QWebEngineDownloadItem::UnknownSaveFormat)  {
+            qDebug() << "Format: " <<  download->savePageFormat();
+            qDebug() << "Path: " << download->path();
+//            // If you want to modify something like the default path or the format
+//            download->setSavePageFormat(...);
+//            download->setPath(...);
+            // Check your url to accept/reject the download
+            download->accept();
+        }
+        else {
+            qDebug() << "TESt";
+            qDebug() << "Path: " << download->path();
+            download->accept();
+        }
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -34,6 +53,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 //    ui->centralwidget->b`
 //    ui->qwtPlot->ins
+
+    auto view = new QWebEngineView(this);
+
+    view->setUrl(QUrl("http://localhost:4001/"));
+
+    auto page = view->page();
+    auto profile = page->profile();
+
+    connect(profile, &QWebEngineProfile::downloadRequested,
+                    this, &MainWindow::downloadRequested);
+
+    connect(page, &QWebEnginePage::featurePermissionRequested, [page](const QUrl &securityOrigin, QWebEnginePage::Feature feature){
+
+        if(feature  == QWebEnginePage::MediaAudioCapture
+                || feature == QWebEnginePage::MediaVideoCapture
+                || feature == QWebEnginePage::MediaAudioVideoCapture)
+            page->setFeaturePermission(securityOrigin, feature, QWebEnginePage::PermissionGrantedByUser);
+        else
+            page->setFeaturePermission(securityOrigin, feature, QWebEnginePage::PermissionDeniedByUser);
+    });
+
+    ui->webly->addWidget(view);
+
 
     simpixmap = *(ui->simulationTest->pixmap());
 

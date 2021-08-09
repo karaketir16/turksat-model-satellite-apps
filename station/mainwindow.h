@@ -9,6 +9,8 @@
 #include <qwt_symbol.h>
 #include <stationtelemetryobject.h>
 
+#include <QWebEngineView>
+
 class StationTelemetryObject;
 
 struct PlotStruct {
@@ -23,6 +25,24 @@ struct PlotStruct {
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+//class WebEnginePage: public QWebEnginePage{
+//    Q_OBJECT
+//public:
+//    WebEnginePage(QObject *parent = Q_NULLPTR):QWebEnginePage(parent){
+
+//    }
+//private Q_SLOTS:
+//    void onFeaturePermissionRequested(const QUrl &securityOrigin, QWebEnginePage::Feature feature){
+
+//        if(feature  == QWebEnginePage::MediaAudioCapture
+//                || feature == QWebEnginePage::MediaVideoCapture
+//                || feature == QWebEnginePage::MediaAudioVideoCapture)
+//            setFeaturePermission(securityOrigin, feature, QWebEnginePage::PermissionGrantedByUser);
+//        else
+//            setFeaturePermission(securityOrigin, feature, QWebEnginePage::PermissionDeniedByUser);
+//    }
+//};
 
 class MainWindow : public QMainWindow
 {
@@ -65,6 +85,8 @@ private slots:
     void on_csvLineText_textChanged(const QString &arg1);
 
     void on_actionDVR_Ka_triggered();
+
+    void downloadRequested(QWebEngineDownloadItem* download);
 
 private:
     Ui::MainWindow *ui;
