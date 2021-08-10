@@ -37,8 +37,11 @@
   }
 }
 
+video{
+  width:50%;
+}
 
 .leaflet-container {
-  height: 800px;
+  height: 300px;
   width: 100%;
 }

@@ -201,15 +201,18 @@ const WebcamStreamCapture = () => {
   return (
     <>
       <Webcam audio={false} ref={webcamRef}  videoConstraints={{ deviceId: selected }}/>
+      <br/>
       {capturing ? (
         <button onClick={handleStopCaptureClick}>Video Kaydını Durdur</button>
       ) : (
         <button onClick={handleStartCaptureClick}>Vıdeo Kaydını Başlat</button>
       )}
+      <br/>
       {recordedChunks.length > 0 && (
         <button onClick={handleDownload}>Vıdeoyu Dosya Sistemine Kaydet</button>
       )}
 
+<br/>
 <Dropdown
     placeholder='Kamera veya video alıcısı seçin'
     fluid
@@ -281,17 +284,24 @@ const WebcamCapture = () => {
 
 function App() {
   return (
-    <Grid>
-      <Grid.Column width={8}>
-        <SimpleExample />
-      </Grid.Column>
-      <Grid.Column width={8}>
-        <WebcamStreamCapture />
-      </Grid.Column>
+    // <Grid>
+    //   <Grid.Row height={8}>
+    //     {/* <SimpleExample /> */}
+    //   </Grid.Row>
+    //   <Grid.Row >
+    //     <WebcamStreamCapture />
+    //   </Grid.Row>
 
-    {/* <WebcamCapture /> */}
+
+    // {/* <WebcamCapture /> */}
     
-    </Grid>
+    // </Grid>
+      <>
+      <div >
+        <SimpleExample/>
+        </div> 
+      <WebcamStreamCapture/>
+      </>
   );
 }
 

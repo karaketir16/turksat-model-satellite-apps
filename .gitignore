@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/qt,qtcreator
 # Edit at https://www.toptal.com/developers/gitignore?templates=qt,qtcreator
 
+.DS_Store
+
 ### Qt ###
 # C++ objects and libs
 *.slo
