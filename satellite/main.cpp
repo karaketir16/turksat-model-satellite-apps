@@ -23,6 +23,8 @@ extern "C" {
 #include "arduinonanoobject.h"
 //#include "./lsm9ds0/SFE_LSM9DS0.h"
 
+#include "./lsm9ds1/SparkFunLSM9DS1.h"
+
 QByteArray getted;
 QString serialPortName = "ttyS0";
 QString serialPortNameNano = "ttyUSB0";
@@ -31,10 +33,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    qDebug() << "Hello Test";
     qRegisterMetaType<uint16_t>("uint16_t");
 
 
-    ArduinoNanoObject ardn;
+
 
     SatelliteTelemetryObject tmObj;
 
@@ -48,6 +51,24 @@ int main(int argc, char *argv[])
 
     tmObj.beepBuzzer(50);
     usleep(1000 * 1000);
+
+
+//    LSM9DS1 lsm1;
+//    qDebug() << "new: " << lsm1.begin();
+
+//    while(true){
+
+//        qDebug() << lsm1.calcAccel(lsm1.readAccel(Z_AXIS));
+//        qDebug() << lsm1.readAccel(Z_AXIS);
+//        lsm1.readTemp();
+//        qDebug() << lsm1.temperature;
+
+//        usleep(1000 * 500);
+//    }
+
+//    return 0;
+
+    ArduinoNanoObject ardn;
 
     QProcess::execute("gpio -g mode 12 pwm");
     QProcess::execute("gpio pwm-ms");

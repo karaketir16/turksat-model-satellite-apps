@@ -2,7 +2,7 @@ QT -= gui
 QT += serialport
 
 
-CONFIG += c++11 console
+CONFIG += c++11 console c99
 CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
@@ -21,12 +21,6 @@ SOURCES += \
         ../protocol/mainobj.cpp \
         ../protocol/protocol.cpp \
         ../protocol/telemetry_protocol.cpp \
-        arduinonanoobject.cpp \
-        lsm9ds1/SparkFunLSM9DS1.cpp \
-        main.cpp \
-        my_i2c/my_i2c.c \
-        nano_packets.c \
-        satellitetelemetryobject.cpp
 
 
 # Default rules for deployment.
@@ -34,16 +28,13 @@ target.path = /usr/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    arduinonanoobject.h \
-    lsm9ds1/LSM9DS1_Registers.h \
-    lsm9ds1/LSM9DS1_Types.h \
-    lsm9ds1/SparkFunLSM9DS1.h \
-    nano_packets.h \
     ../protocol/abstracttelemetryobject.h \
     ../protocol/mainobj.h \
     ../protocol/protocol.h \
     ../protocol/telemetry_protocol.h \
-    my_i2c/my_i2c.h \
-    satellitetelemetryobject.h
+
+SOURCES += $$files(*.cpp, true)
+SOURCES += $$files(*.c, true)
+HEADERS += $$files(*.h, true)
 
 

@@ -237,7 +237,9 @@ void MainWindow::on_sendButton_clicked()
     auto tempPath = ui->videoFilePath->text();
 
     auto tempFileName =  VIDEO_PATH + QFileInfo(QFile(tempPath)).fileName();
+    QFile::remove(tempFileName);
     if(tempFileName.right(4) == ".mp4"){
+        qDebug() << "ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName;
         QProcess::execute("ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName);
     }
     else{

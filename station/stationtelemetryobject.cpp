@@ -123,11 +123,10 @@ void StationTelemetryObject::videoSender(bool firstTime){
         qDebug() <<"FileName: " << videoPath;
         QFile file(videoPath);
         if( ! file.open(QIODevice::ReadOnly)){
-            qDebug() << "Cannot Open";
+            qDebug() << "Cannot Open Video";
         }
         videoData = file.readAll();
         videoSize = videoData.size();
-
 
 
         for(uint64_t i =0; i < videoSize; i+=PARTSIZE)
