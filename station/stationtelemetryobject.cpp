@@ -115,10 +115,6 @@ void StationTelemetryObject::videoReadyChecker(){
 }
 
 void StationTelemetryObject::videoSender(bool firstTime){
-
-
-//    return;
-
     if(firstTime){
         qDebug() <<"FileName: " << videoPath;
         QFile file(videoPath);
@@ -151,6 +147,8 @@ void StationTelemetryObject::videoSender(bool firstTime){
         videoSenderIndex = 0;
     }
 
+    return;
+
     if(videoNameSetted || ackedPackages.contains(videoSetTelemNumber)){
         videoNameSetted = true;
 
@@ -174,7 +172,6 @@ void StationTelemetryObject::videoSender(bool firstTime){
                 memcpy(vd.video_data, packet.data(), vd.video_data_len);
 
                 reSender(to_byte_array(&vd, sizeof(vd)), false, true);
-
             }
 
             videoSenderIndex++;
@@ -273,6 +270,25 @@ void StationTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK vide
         ackedVideoParts.insert(video_data_ACK.video_packet_number);
     }
 }
+
+void StationTelemetryObject::received_PACKAGE_Video_Get(Video_Get video_get){
+    qDebug() << "get video: " << video_get.video_packet_number;
+
+    qDebug() << "SEND : " << video_get.video_packet_number;
+
+    auto packet = videoPackets[video_get.video_packet_number];
+
+    Video_Data vd;
+    vd.header.type = Package_Enum::VIDEO_DATA;
+    vd.video_data_len = packet.size();
+    vd.video_packet_number = video_get.video_packet_number;
+
+    //            qDebug() << "will send: " << packet.toHex();
+    memcpy(vd.video_data, packet.data(), vd.video_data_len);
+
+    reSender(to_byte_array(&vd, sizeof(vd)), false, true);
+}
+
 
 void StationTelemetryObject::received_COMMAND(Command){
     //NOT IMPLEMENTED

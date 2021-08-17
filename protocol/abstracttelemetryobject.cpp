@@ -6,18 +6,6 @@ AbstractTelemetryObject::AbstractTelemetryObject(QObject *parent) : QThread(pare
 
 }
 
-//uint32_t AbstractTelemetryObject::sender(QByteArray data, uint8_t resend){ // old function
-//    Telemetry_Header * hd = (Telemetry_Header *)data.data();
-//    if( ! resend)
-
-////    qDebug() << "resend: " << resend <<" counter: "<< telemetry_number_counter;
-
-////    qDebug() << "hex: " << data.toHex();
-////    qDebug() << "before send check: " << crc_is_valid((uint8_t*)data.data(), data.size());
-//    emit send(data, receiver);
-//    return hd->telemetry_number;
-//}
-
 uint32_t AbstractTelemetryObject::setTelemetryNumber(QByteArray &data){
     Telemetry_Header * hd = (Telemetry_Header *)data.data();
     hd->telemetry_number = generateTelemetryNumber();
@@ -119,6 +107,9 @@ void AbstractTelemetryObject::received_DATA(QByteArray DATA){
             break;
             case Package_Enum::VIDEO_DATA_ACK:
                 received_PACKAGE_Video_Data_ACK(*((Video_Data_ACK*)DATA.data()));
+            break;
+            case Package_Enum::VIDEO_GET:
+                received_PACKAGE_Video_Get(*((Video_Get*)DATA.data()));
             break;
         }
     }

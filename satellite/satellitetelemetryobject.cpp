@@ -7,7 +7,7 @@
 #include <QDateTime>
 #include <math.h>
 #include "lsm9ds1/SparkFunLSM9DS1.h"
-
+#include <QTimer>
 
 
 
@@ -446,12 +446,15 @@ void SatelliteTelemetryObject::received_PACKAGE_Set_Video_Name(Set_Video_Name se
     qDebug() << "Set Video Name: " << QString((char*)set_video_name.name);
 
     testTimer.start();
+    QTimer::singleShot(10, [this](){
+        getVideo(0);
+    });
 }
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data){
     if(videoFile.isOpen()){
         if(videoData[video_data.video_packet_number].size() != 0){
             //duplicate Video package
-//            qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
+            qDebug() << "Duplicate VIDEO package: " << video_data.video_packet_number;
         }
         else {
             QByteArray tmp(video_data.video_data_len,0x00);
@@ -471,10 +474,37 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
         Telemetry_update.lastNotReceivedVideo = videoWritePointer;
     }
 }
+
+void SatelliteTelemetryObject::getVideo(uint32_t part){
+    qDebug() << "Get Video: " << part;
+    if(part == expectedVideoParts){
+        part = videoWritePointer;
+    }
+    if(part == expectedVideoParts){
+        qDebug() << "Done Video";
+    } else {
+        Video_Get video_get;
+        video_get.video_packet_number = part;
+        video_get.header.type = VIDEO_GET;
+        auto get_video = to_byte_array(&video_get, sizeof (video_get));
+        reSender(get_video, false, true);
+        QTimer::singleShot(50, [this,part](){
+            getVideo(part + 1);
+        });
+    }
+}
+
+
 void SatelliteTelemetryObject::received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK){
     //Not Implemented
     Q_UNUSED(video_data_ACK);
 }
+void SatelliteTelemetryObject::received_PACKAGE_Video_Get(Video_Get video_get){
+    //Not Implemented
+    Q_UNUSED(video_get);
+}
+
+
 
 
 void SatelliteTelemetryObject::Altitude_Calibrate(uint8_t data){

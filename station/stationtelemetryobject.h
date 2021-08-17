@@ -38,6 +38,7 @@ public:
     void received_PACKAGE_Set_Video_Name(Set_Video_Name set_video_name) override;
     void received_PACKAGE_Video_Data(Video_Data video_data) override;
     void received_PACKAGE_Video_Data_ACK(Video_Data_ACK video_data_ACK) override;
+    void received_PACKAGE_Video_Get(Video_Get video_get) override;
 
 
 
