@@ -7,7 +7,9 @@ mainObj::mainObj(QObject *parent) : QObject(parent)
 {
     serial = new QSerialPort();
     serial->setPortName(serialPortName);
-    serial->setBaudRate(QSerialPort::Baud115200);
+//    serial->setBaudRate(QSerialPort::Baud115200);
+    serial->setBaudRate(230400);
+
     if( ! serial->open(QSerialPort::ReadWrite)){
         qDebug() << "Cannot open " << serialPortName;
     }

@@ -124,6 +124,7 @@ void StationTelemetryObject::videoSender(bool firstTime){
         videoData = file.readAll();
         videoSize = videoData.size();
 
+        videoPackets = QVector<QByteArray>();
 
         for(uint64_t i =0; i < videoSize; i+=PARTSIZE)
         {

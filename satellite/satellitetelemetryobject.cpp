@@ -483,7 +483,7 @@ void SatelliteTelemetryObject::getVideo(uint32_t part){
         part = videoWritePointer;
     }
 
-    if(videoWritePointer + 100 < part){
+    if(videoWritePointer + 150 < part){
         part = videoWritePointer;
     }
 
@@ -505,7 +505,7 @@ void SatelliteTelemetryObject::getVideo(uint32_t part){
         video_get.header.type = VIDEO_GET;
         auto get_video = to_byte_array(&video_get, sizeof (video_get));
         reSender(get_video, false, true);
-        QTimer::singleShot(20, [this,part](){
+        QTimer::singleShot(25, [this,part](){
             getVideo(part + 1);
         });
     }
@@ -690,7 +690,7 @@ void SatelliteTelemetryObject::telemetrySetter(){
 void SatelliteTelemetryObject::telemetrySender(){
     reSender(Telemetry_sendThis, false, false);
 
-    QTimer::singleShot(50,[&](){
+    QTimer::singleShot(200,[&](){
         telemetrySender();
     });
 }
