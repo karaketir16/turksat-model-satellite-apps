@@ -171,33 +171,25 @@ void SatelliteTelemetryObject::writeSaveValues(){
 }
 
 void SatelliteTelemetryObject::addPressure(float hPa){
-    pressureValues.push_back(hPa);
-    if(pressureValues.size() > 10){
-        pressureValues.pop_front();
+    if(pressure){
+        pressure = (8.0 / 10.0) * pressure + (2.0 / 10.0) * hPa;
+    } else {
+        pressure = hPa;
     }
 }
 float SatelliteTelemetryObject::getAveragePressure(){
-    float tmp = 0;
-    for(auto &a: pressureValues){
-        tmp += a;
-    }
-    tmp /= pressureValues.size();
-    return tmp;
+    return pressure;
 }
 
 void SatelliteTelemetryObject::addVoltage(float V){
-    voltageValues.push_back(V);
-    if(voltageValues.size() > 20){
-        voltageValues.pop_front();
+    if(voltage){
+        voltage = (8.0 / 10.0) * voltage + (2.0 / 10.0) * V;
+    } else {
+        voltage = V;
     }
 }
 float SatelliteTelemetryObject::getAverageVoltage(){
-    float tmp = 0;
-    for(auto &a: voltageValues){
-        tmp += a;
-    }
-    tmp /= voltageValues.size();
-    return tmp;
+    return voltage;
 }
 
 

@@ -88,9 +88,6 @@ public:
     uint8_t telemetryRefresh = 0;
 //    uint8_t tele;
 
-    float pressure0 = 1013;
-
-
 
     float heightCalculator(float hPa, float p0);
 
@@ -99,11 +96,15 @@ public:
     QVector<float> pressureValues;
     void addPressure(float);
     float getAveragePressure();
+    float pressure0 = 1013;
+    float pressure = 0;
+
 
 
     QVector<float> voltageValues;
     void addVoltage(float);
     float getAverageVoltage();
+    float voltage = 0;
 
     QElapsedTimer nanoTimer;
 
