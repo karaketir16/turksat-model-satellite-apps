@@ -26,7 +26,8 @@ enum Package_Enum {
     COMMAND                 ,
     SET_VIDEO_NAME          ,
     VIDEO_DATA              ,
-    VIDEO_DATA_ACK
+    VIDEO_DATA_ACK          ,
+    VIDEO_GET
 };
 
 
@@ -174,6 +175,13 @@ typedef struct __attribute__((packed)) Video_Data_ACK {
     uint8_t crca;
     uint8_t crcb;
 } Video_Data_ACK;
+
+typedef struct __attribute__((packed)) Video_Get {
+    Telemetry_Header header;
+    uint32_t video_packet_number;
+    uint8_t crca;
+    uint8_t crcb;
+} Video_Get;
 
 //typedef struct __attribute__((packed)) Set_Thrust {
 //    Telemetry_Header header;
