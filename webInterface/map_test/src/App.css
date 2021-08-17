@@ -38,10 +38,14 @@
 }
 
 video{
-  width:50%;
+  width:60%;
 }
 
 .leaflet-container {
   height: 300px;
   width: 100%;
+}
+
+.dropdown {
+  width: 250px !important;
 }

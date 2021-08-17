@@ -108,7 +108,9 @@ function SimpleExample() {
           </Popup> */}
         </Marker>
       </LeafletMap>
+      <hr/>
       <b>Enlem {pos.lat}, Boylam {pos.long}</b>
+      <hr/>
       </>
     );
   
