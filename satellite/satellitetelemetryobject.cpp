@@ -9,7 +9,7 @@
 #include "lsm9ds1/SparkFunLSM9DS1.h"
 #include <QTimer>
 
-
+#include <QProcess>
 
 #define HEIGHT_MOCK
 #undef HEIGHT_MOCK
@@ -35,10 +35,10 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
     telemetry_number_counter = 0;
 
 
-    for(int i = 0; i < 3 ; i++){
+    for(int i = 0; i < 1 ; i++){
         saveValuesFile[i].setFileName(VIDEO_PATH SAVE_FILE + QString::number(i));
     }
-    for(int i = 0; i < 3 ; i++){
+    for(int i = 0; i < 1 ; i++){
 
         saveValuesFile[i].open(QIODevice::ReadWrite);
         QByteArray ba = saveValuesFile[i].readAll();
@@ -156,7 +156,7 @@ void SatelliteTelemetryObject::writeSaveValues(){
 
     crc_fill((uint8_t*)&saveValues, sizeof (saveValues));
 
-    for(int i =0; i < 3; i++){
+    for(int i =0; i < 1; i++){
         saveValuesFile[i].open(QIODevice::ReadWrite | QIODevice::Truncate);
 //        saveValuesFile[i].resize(0);
     //    saveValuesFile.seek(0);
@@ -468,6 +468,7 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
         }
 
         videoFile.flush();
+
         if(videoWritePointer == expectedVideoParts){
             Telemetry_update.video_check = true;
         }
@@ -476,10 +477,26 @@ void SatelliteTelemetryObject::received_PACKAGE_Video_Data(Video_Data video_data
 }
 
 void SatelliteTelemetryObject::getVideo(uint32_t part){
-    qDebug() << "Get Video: " << part;
+//    qDebug() << "Get Video: " << part << " of : " << expectedVideoParts;
+//    qDebug() << "Pointer: " << videoWritePointer;
     if(part == expectedVideoParts){
         part = videoWritePointer;
     }
+
+    if(videoWritePointer + 100 < part){
+        part = videoWritePointer;
+    }
+
+    for(; part < expectedVideoParts; part++){
+        if(videoData[part].size() !=0){
+            continue;
+        } else {
+            break;
+        }
+    }
+
+
+
     if(part == expectedVideoParts){
         qDebug() << "Done Video";
     } else {
@@ -488,7 +505,7 @@ void SatelliteTelemetryObject::getVideo(uint32_t part){
         video_get.header.type = VIDEO_GET;
         auto get_video = to_byte_array(&video_get, sizeof (video_get));
         reSender(get_video, false, true);
-        QTimer::singleShot(50, [this,part](){
+        QTimer::singleShot(20, [this,part](){
             getVideo(part + 1);
         });
     }
@@ -646,6 +663,7 @@ void SatelliteTelemetryObject::telemetrySetter(){
         telemetyOutput.flush();
     }
 
+
     qDebug()  << QString("%1,%2,%3,%4,%5,%6,"
                                                   "%7,%8,%9,%10,%11,"
                                                   "%12,%13,%14,%15,%16,%17\n")
@@ -666,6 +684,7 @@ void SatelliteTelemetryObject::telemetrySetter(){
                                            .arg(data.yaw)
                                            .arg(data.rotation_count)
                                            .arg(data.video_check ? "Evet" : "Hayır");
+    QProcess::execute("sync");
 }
 
 void SatelliteTelemetryObject::telemetrySender(){

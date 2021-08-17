@@ -192,6 +192,14 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
 
     ui->progressBar->setValue( 100 * data.lastNotReceivedVideo / stationTelemetryObject->videoPartCount);
 
+
+    if( data.video_check ){
+        ui->videosenderText->setText("Video Gönderimi Tamamlandi");
+    }
+
+
+
+
     ui->signalLevel->setText("-" + QString::number(RSSI) + "dBm");
 
     ui->textSatelliteStatus->setText(Status_Text[data.status]);
@@ -234,17 +242,32 @@ void MainWindow::on_fileSelect_clicked()
 
 void MainWindow::on_sendButton_clicked()
 {
+    ui->sendButton->setEnabled(false);
+
     auto tempPath = ui->videoFilePath->text();
 
-    auto tempFileName =  VIDEO_PATH + QFileInfo(QFile(tempPath)).fileName();
+    auto basename = QFileInfo(QFile(tempPath)).baseName();
+
+    auto tempFileName =  VIDEO_PATH + basename + ".mp4" ;
+
+    auto tmptmp = VIDEO_PATH + QString("tmp.mp4");
+
+
+    QFile::remove(tmptmp);
+    QProcess::execute("ffmpeg -i " + tempPath + " -vcodec libx265 -crf 30 " + tmptmp);
     QFile::remove(tempFileName);
-    if(tempFileName.right(4) == ".mp4"){
-        qDebug() << "ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName;
-        QProcess::execute("ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName);
-    }
-    else{
-        QProcess::execute("cp " + tempPath + " " + tempFileName);
-    }
+    QProcess::execute("ffmpeg -i " + tmptmp + " -vcodec copy -acodec copy -movflags faststart " + tempFileName);
+
+
+//    auto tempFileName =  VIDEO_PATH + QFileInfo(QFile(tempPath)).fileName();
+//    QFile::remove(tempFileName);
+//    if(tempFileName.right(4) == ".mp4"){
+//        qDebug() << "ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName;
+//        QProcess::execute("ffmpeg -i " + tempPath + " -vcodec copy -acodec copy -movflags faststart " + tempFileName);
+//    }
+//    else{
+//        QProcess::execute("cp " + tempPath + " " + tempFileName);
+//    }
 
 
 //    Q_ASSERT(false);
