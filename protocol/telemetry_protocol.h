@@ -77,8 +77,8 @@ extern QVector<QString> Status_Text ;
 #define TEST_THRUST_1                      105 //can be larger, 21 or 22 not sure
 
 
-#define SEPERATOR_SEPERATED                   170
-#define SEPERATOR_NOT_SEPERATED               115
+#define SEPERATOR_SEPERATED                   43
+#define SEPERATOR_NOT_SEPERATED               31
 
 
 
