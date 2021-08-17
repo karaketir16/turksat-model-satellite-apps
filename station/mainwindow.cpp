@@ -40,7 +40,9 @@ void MainWindow::downloadRequested(QWebEngineDownloadItem* download) {
             download->accept();
         }
         else {
-            qDebug() << "TESt";
+            auto date = QDateTime::currentDateTime();
+            QString formattedTime = date.toString("dd_MM_yyyy_hh_mm_ss_");
+            download->setPath(SAVE_FOLDER + formattedTime + QString("video_kayit.webm"));
             qDebug() << "Path: " << download->path();
             download->accept();
         }

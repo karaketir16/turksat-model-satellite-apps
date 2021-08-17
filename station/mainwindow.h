@@ -11,6 +11,8 @@
 
 #include <QWebEngineView>
 
+#define SAVE_FOLDER "/home/izzet/TURKSAT/"
+
 class StationTelemetryObject;
 
 struct PlotStruct {

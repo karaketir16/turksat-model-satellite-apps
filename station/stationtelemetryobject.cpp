@@ -6,7 +6,7 @@
 
 #define SAVE_FILE   "KaldigimizYerdenDevamiSaglayanDosya.nevfeza"
 #define REACT_FILE  "../coordAktarim.json"
-#define SAVE_FOLDER "/home/karaketir16/TURKSAT/"
+
 
 #include <QProcess>
 
