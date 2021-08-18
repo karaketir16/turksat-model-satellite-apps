@@ -584,7 +584,7 @@ void SatelliteTelemetryObject::Test_Thrust(uint8_t data){
             QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) TEST_THRUST_1);
             QProcess::execute(str);
 
-            QTimer::singleShot(10000, [&](){
+            QTimer::singleShot(5000, [&](){
                 QString str = QString("gpio -g pwm ") + QString(" 13 ") + QString::number((int) MIN_THRUST);
                 QProcess::execute(str);
             });
