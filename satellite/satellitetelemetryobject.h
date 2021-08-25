@@ -63,7 +63,7 @@ public:
     QTimer tmLMH;
 
 
-    uint16_t team_no = 53402;
+    uint16_t team_no = 30486;
 
     bool manuelThrust = true; // SET false this
 
