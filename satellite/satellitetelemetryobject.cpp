@@ -171,7 +171,7 @@ void SatelliteTelemetryObject::writeSaveValues(){
 }
 
 void SatelliteTelemetryObject::addPressure(float hPa){
-    if(pressure){
+    if(pressure == 0){
         pressure = (8.0 / 10.0) * pressure + (2.0 / 10.0) * hPa;
     } else {
         pressure = hPa;
@@ -182,7 +182,7 @@ float SatelliteTelemetryObject::getAveragePressure(){
 }
 
 void SatelliteTelemetryObject::addVoltage(float V){
-    if(voltage){
+    if(voltage == 0){
         voltage = (8.0 / 10.0) * voltage + (2.0 / 10.0) * V;
     } else {
         voltage = V;
