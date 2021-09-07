@@ -146,7 +146,10 @@ void setup()
 //  unsigned status = bme.begin(); /
     unsigned status = bmp.begin_SPI(BME_CS);
 
-
+  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_7);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
 }
 
 uint32_t timer = millis();
