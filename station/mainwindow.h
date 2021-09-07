@@ -11,7 +11,7 @@
 
 #include <QWebEngineView>
 
-#define SAVE_FOLDER "/home/izzet/TURKSAT/"
+#define SAVE_FOLDER "/home/burhan/TURKSAT/"
 
 class StationTelemetryObject;
 
