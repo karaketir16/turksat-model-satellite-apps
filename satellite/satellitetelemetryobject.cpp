@@ -292,7 +292,7 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
         break;
 
         case Status_Enum::Start:
-            if(Telemetry_update.height > 40){
+            if(Telemetry_update.height > 100){
                 Telemetry_update.status = Status_Enum::Rising_Before_400;
                 MOTOR_ARM();
             }
