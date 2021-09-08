@@ -165,17 +165,13 @@ void MainWindow::newTelemetryData(Telemetry_Data data){
     ui->textTemp->setText(QString::number(data.temperature, 'g', 2));
 
     if(data.GPS_fix){
-        longitudeStruct.points << QPointF(data.package_number, removePrec(0.001, data.gps_longtitude));
-        rePlot(longitudeStruct);
+        qDebug() << "FIX";
+
+
         ui->textLong->setText(QString::number(data.gps_longtitude, 'g', 10));
 
-
-        latitudeStruct.points << QPointF(data.package_number, removePrec(0.001, data.gps_latitude));
-        rePlot(latitudeStruct);
         ui->textLat->setText(QString::number(data.gps_latitude, 'g', 10));
 
-        altitudeStruct.points << QPointF(data.package_number, removePrec(0.01, data.gps_altiude));
-        rePlot(altitudeStruct);
 //        ui->text->setText(QString::number(data.gps_latitude));
     }
 

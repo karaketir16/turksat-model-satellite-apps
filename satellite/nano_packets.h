@@ -25,6 +25,7 @@ typedef struct __attribute__((packed)) nano_package {
     uint16_t year;
 
     float pressure;
+    float altitude;
     float temp;
 
     float voltage;

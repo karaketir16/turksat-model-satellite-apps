@@ -227,6 +227,16 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
     Telemetry_update.gps_latitude =latLong(np.gps_latitude);
     Telemetry_update.gps_longtitude = latLong(np.gps_longtitude);
 
+    Telemetry_update.GPS_fix = np.gps_fix;
+
+    Telemetry_update.day = np.day;
+    Telemetry_update.month = np.month;
+    Telemetry_update.year = np.year;
+
+    Telemetry_update.hour = np.hour;
+    Telemetry_update.minute = np.minute;
+    Telemetry_update.second = np.second;
+
     addPressure(np.pressure);
     Telemetry_update.pressure = getAveragePressure();
 
@@ -238,7 +248,7 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
 //    Telemetry_update.GPS_fix = np.gps_fix;
 
-    auto newHeight = heightCalculator(getAveragePressure(), pressure0);
+    auto newHeight = np.altitude;//heightCalculator(getAveragePressure(), pressure0);
 
     newHeight -= groundHeight;
 

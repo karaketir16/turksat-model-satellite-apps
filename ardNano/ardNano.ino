@@ -28,6 +28,7 @@ typedef struct __attribute__((packed)) nano_package {
     uint16_t year;
 
     float pressure;
+    float altitude;
     float temp;
 
     float voltage;
@@ -60,7 +61,7 @@ auto &mySerial = Serial;
 #define BME_CS 10
 //..........................
 
-#define SEALEVELPRESSURE_HPA (1004.63)
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 //Adafruit_BME280 bme(BME_CS); // hardware SPI/
 
@@ -146,10 +147,10 @@ void setup()
 //  unsigned status = bme.begin(); /
     unsigned status = bmp.begin_SPI(BME_CS);
 
-  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_16X);
-  bmp.setPressureOversampling(BMP3_OVERSAMPLING_16X);
-  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_31);
-  bmp.setOutputDataRate(BMP3_ODR_25_HZ);
+   bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
 }
 
 uint32_t timer = millis();
@@ -179,7 +180,7 @@ void loop()                     // run over and over again
 
         int sensorValue = analogRead(A0);
         float v1 = (sensorValue)*5.0/1023.0;
-        float voltage = (2.9)*v1;
+        float voltage = (2.52)*v1;
 
         bmp.performReading();
 
@@ -198,6 +199,8 @@ void loop()                     // run over and over again
 //        toSent.temp = bme.readTemperature();
 //
        toSent.pressure = bmp.pressure / 100.0F;
+       toSent.altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA);
+       
        toSent.temp = bmp.temperature;
         
         toSent.voltage = voltage;
