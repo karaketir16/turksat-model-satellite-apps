@@ -27,6 +27,9 @@ void MainWindow::plotConfig(PlotStruct &strc){
     strc.symbol = new QwtSymbol( QwtSymbol::Ellipse,
                              QBrush( Qt::yellow ), QPen( Qt::red, 2 ), QSize( 2, 2 ) );
 //    strc.curve->setSymbol( strc.symbol );
+
+    strc.ptr->setAxisMaxMajor(QwtPlot::xBottom, 4);
+    strc.ptr->setAxisMaxMinor(QwtPlot::xBottom, 0);
 }
 
 void MainWindow::downloadRequested(QWebEngineDownloadItem* download) {
@@ -83,29 +86,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     heightStruct.ptr = ui->heightPlot;
     tempStruct.ptr = ui->tempPlot;
-//    longitudeStruct.ptr = ui->longitudePlot;
-//    latitudeStruct.ptr = ui->latitudePlot;
-//    altitudeStruct.ptr = ui->alttudePlot;
     speedStruct.ptr = ui->speedPlot;
     voltageStruct.ptr = ui->voltagePlot;
     pressureStruct.ptr = ui->pressurePlot;
-
-
 
     heightStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     heightStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Yükseklik(metre)");
 
     tempStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     tempStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Sıcaklık(°C)");
-
-//    longitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-//    longitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Enlem");
-
-//    latitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-//    latitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Boylam");
-
-//    altitudeStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
-//    altitudeStruct.ptr->setAxisTitle( QwtPlot::yLeft, "GPS Rakım");
 
     speedStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     speedStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Hız(m/s)");
@@ -117,12 +106,8 @@ MainWindow::MainWindow(QWidget *parent)
     pressureStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Basınç(hPa)");
 
 
-
     plotConfig(heightStruct);
     plotConfig(tempStruct);
-//    plotConfig(longitudeStruct);
-//    plotConfig(latitudeStruct);
-//    plotConfig(altitudeStruct);
     plotConfig(speedStruct);
     plotConfig(voltageStruct);
     plotConfig(pressureStruct);
