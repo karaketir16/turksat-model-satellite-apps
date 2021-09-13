@@ -115,6 +115,8 @@ public:
 
     void beepBuzzer(int ms);
 
+    void fireCapsule();
+
 
 
 

@@ -101,6 +101,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     voltageStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     voltageStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Gerilim(V)");
+    voltageStruct.ptr->setAxisMaxMajor(QwtPlot::yLeft, 5);
+    voltageStruct.ptr->setAxisMaxMinor(QwtPlot::yLeft, 2);
 
     pressureStruct.ptr->setAxisTitle( QwtPlot::xBottom, "Zaman(saniye)");
     pressureStruct.ptr->setAxisTitle( QwtPlot::yLeft, "Basınç(hPa)");

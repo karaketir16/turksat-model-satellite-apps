@@ -56,6 +56,7 @@ enum Status_Enum {
     Falling_Before_Sep  ,
     Seperating          ,
     Falling_After_Sep   ,
+    Stabilize           ,
     Slow_Fall           ,
     Ground_After_Fall   ,
     End                 ,

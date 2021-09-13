@@ -36,7 +36,9 @@ int main(int argc, char *argv[])
     qDebug() << "Hello Test";
     qRegisterMetaType<uint16_t>("uint16_t");
 
-
+    //yakma
+    QProcess::execute("gpio -g mode 5 out");
+    QProcess::execute("gpio -g write 5 0");
 
 
     SatelliteTelemetryObject tmObj;

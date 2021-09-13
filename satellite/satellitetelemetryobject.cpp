@@ -53,9 +53,12 @@ SatelliteTelemetryObject::SatelliteTelemetryObject()
                 telemetry_number_counter = sv.telemetry_number;
                 Telemetry_update.status = sv.status;
                 groundHeight = sv.groundHeight;
+#ifdef HEIGHT_MOCK
+                groundHeight = 0;
+#endif
                 rotationCounter = sv.rotationCount;
                 qDebug() << "Save found, package number: " << sv.package_number;
-
+                qDebug() << "Ground Height: " << sv.groundHeight;
 //                break;
             }
         }
@@ -197,15 +200,21 @@ static float MOCK_I = 0;
 
 float SatelliteTelemetryObject::heightCalculator(float hPa, float p0){
 #ifdef HEIGHT_MOCK
-
-
-    if(MOCK_H - groundHeight > 500 ){
+    if(MOCK_I != 0 && MOCK_H > 600 ){
         MOCK_I = -1;
     }
 
     if(MOCK_I == 1){
         return MOCK_H += (MOCK_I * 15);
     }
+
+    if (MOCK_I == 0){
+        return MOCK_H;
+    }
+
+    if( MOCK_H < 0)
+        return MOCK_H = 0;
+
     return MOCK_H += (MOCK_I * (rand()%20)/10.0);
 #else
     return 44330.0 * (1.0 - pow(hPa / p0, 0.1903));
@@ -246,10 +255,11 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
     Telemetry_update.temperature = np.temp;
 
-//    Telemetry_update.GPS_fix = np.gps_fix;
-
+#ifndef HEIGHT_MOCK
     auto newHeight = np.altitude;//heightCalculator(getAveragePressure(), pressure0);
-
+#else
+    auto newHeight = heightCalculator(0, 0);
+#endif
     newHeight -= groundHeight;
 
     auto lastTime = nanoTimer.restart();
@@ -295,10 +305,21 @@ void SatelliteTelemetryObject::beepBuzzer(int ms){
     }
 }
 
+void SatelliteTelemetryObject::fireCapsule(){
+    QProcess::execute("gpio -g write 5 1");
+
+    QTimer::singleShot(3000, [](){
+        QProcess::execute("gpio -g write 5 0");
+    });
+}
+
+bool endStabilize = false;
+
 uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
 
     switch (Telemetry_update.status) {
         case Status_Enum::NONE:
+        endStabilize = false;
         break;
 
         case Status_Enum::Start:
@@ -328,10 +349,11 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
             if(Telemetry_update.height < 400){
                 Telemetry_update.status = Status_Enum::Seperating;
                  Seperate_Carrier(0);
+                 QTimer::singleShot(1000,[&](){
+                     this->fireCapsule();
+                 });
                 QTimer::singleShot(500,[&](){
-
-                    //First Run Motors Here
-
+                    //First Run Motors Here // ?????
                     Telemetry_update.status = Status_Enum::Falling_After_Sep;
                 });
             }
@@ -342,7 +364,13 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
         break;
 
         case Status_Enum::Falling_After_Sep:
-            if(Telemetry_update.height < 50){
+            if(Telemetry_update.height > 151 && Telemetry_update.height < 225){
+                Telemetry_update.status = Status_Enum::Stabilize;
+                QTimer::singleShot(10 * 1000,[&](){
+                    endStabilize = true;
+                });
+
+            } else if (Telemetry_update.height < 50){
                 Telemetry_update.status = Status_Enum::Slow_Fall;
             }
             else {
@@ -373,6 +401,25 @@ uint8_t SatelliteTelemetryObject::calcSatelliteStatus() {
                  Set_Thrust(settedThrust);
 //                qDebug() << "Setted Thrust: " << settedThrust;
             }
+        break;
+
+    case Status_Enum::Stabilize:
+        if(Telemetry_update.height < 150 || endStabilize){
+            Telemetry_update.status = Status_Enum::Falling_After_Sep;
+        }
+        else {
+            //Set Motor Speed For slow fall
+            if(Telemetry_update.speed < -3){
+                settedThrust = 80;
+            } else if(Telemetry_update.speed > 3){
+                settedThrust = 50;
+            }
+            else {
+                settedThrust = 60;
+            }
+             Set_Thrust(settedThrust);
+            qDebug() << "Setted Thrust stabilize: " << settedThrust;
+        }
         break;
 
         case Status_Enum::Slow_Fall:

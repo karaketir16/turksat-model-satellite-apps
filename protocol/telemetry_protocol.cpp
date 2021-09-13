@@ -8,6 +8,7 @@ QVector<QString> Status_Text = {
     "Alçalma - Ayrılma Öncesi" ,
     "Alçalma - Ayrılma",
     "Alçalma - Ayrılma Sonrası",
+    "Alçalma - Dengede Kalma",
     "Alçalma - Yavaşlama",
     "Yer Seviyesinde",
     "Yer Seviyesinde - Kayıt Sonlandırıldı",
