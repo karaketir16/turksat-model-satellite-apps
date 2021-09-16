@@ -280,7 +280,7 @@ void SatelliteTelemetryObject::received_Nano_Package(nano_package np){
 
     auto &data = Telemetry_update;
 
-    if(data.day != 0 &&  !  telemetyOutput.device()){
+    if(data.year == 21 &&  !  telemetyOutput.device()){
         telemetryFile.setFileName(QString(VIDEO_PATH) + QString("%1_%2_%3__%4_%5_%6").arg(data.day).
                                   arg(data.month).arg(data.year).arg(data.hour).arg(data.minute).arg(data.second)+ QString(".csv"));
 
